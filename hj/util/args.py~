@@ -1,0 +1,7 @@
+'''Helper module for helping with argparse'''
+
+import hj.device
+
+def name2dtype (name : str) -> hj.device.Type:
+    '''convert a name to a device type'''
+    return hj.device.Type[name]

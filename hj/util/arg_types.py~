@@ -1,0 +1,6 @@
+'''Helper module for helping with argparse'''
+
+import hj.device
+
+def device_type (dt : hj.device.Type):
+    return dt

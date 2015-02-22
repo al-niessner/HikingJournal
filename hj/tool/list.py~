@@ -1,0 +1,13 @@
+#! /usr/bin/env python3
+'''List all of the available routes, tracks, and waypoints.'''
+
+import argparse
+import os
+import sys
+
+if __name__ == '__main__':
+    sys.path.append (os.path.abspath (os.path.join (os.path.dirname (__file__),
+                                                    '../..')))
+    import hj.device
+    ap = argparse.ArgumentParser(description='List all of the available routes, tracks, and waypoints over the given devices. Each device takes its own keywords for construction. Please use the tool "device" for getting details on device keywords. For this tool, each device will be followed by its -kw -kv switches.')
+    pass
