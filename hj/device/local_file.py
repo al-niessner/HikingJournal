@@ -6,7 +6,7 @@ class Interface(hj.device.Interface):
     '''Looks in the local file system for GPX files'''
     def __init__ (self, dir, follow=False, recurse=False,
                   rid='^[Rr]oute.*', tid='^[Tt]rack.*', wid='^[Ww]aypoint.*'):
-        '''Construct and interface that allows access to the local file system
+        '''Construct an interface that allows access to the local file system
 
         dir : directory to look within
         follow : follow links when recurse is True
@@ -70,15 +70,4 @@ class Interface(hj.device.Interface):
     def waypoints(self):
         for wfn in self.__wfns: yield wfn
         return
-    pass
-
-if __name__ == '__main__':
-    di = Interface(dir='/home/niessner/Hiking/garmin', recurse=False)
-    di._load()
-    print ('Routes:')
-    for rfn in di.routes(): print ('   ' + rfn)
-    print ('Tracks:')
-    for tfn in di.tracks(): print ('   ' + tfn)
-    print ('Waypoints:')
-    for wfn in di.waypoints(): print ('   ' + wfn)
     pass
