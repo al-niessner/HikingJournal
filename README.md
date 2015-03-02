@@ -53,8 +53,8 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
 3. gdal
 
 ## To-Do List
-[ ] start tool for firing up the front-end
-    [ ] invoke later (with delay) a browser connected to this front-end
-    [ ] invoke twisted to handle the web events for the front-end
+- [ ] start tool for firing up the front-end
+    - [ ] invoke later (with delay) a browser connected to this front-end
+    - [ ] invoke twisted to handle the web events for the front-end
 
     
