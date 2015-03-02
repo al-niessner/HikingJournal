@@ -28,3 +28,16 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
   4. change waypoint descriptions
   5. change picture description (captions)
   6. add/edit the story
+
+
+## Packages
+- hj.device
+> Modules to make various GPS devices behave as a file system. Simple to do when they already are a file system, but not so obvious when they connect via serial port.
+- hj.fe
+- hj.tool
+- hj..util
+
+## System dependencies
+1. python3
+2. twisted
+3. gdal
