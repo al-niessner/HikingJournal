@@ -32,7 +32,9 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
 
 ## Packages
 - hj.device
+
 > Modules to make various GPS devices behave as a file system. Simple to do when they already are a file system, but not so obvious when they connect via serial port.
+
 - hj.fe
 - hj.tool
 - hj..util
