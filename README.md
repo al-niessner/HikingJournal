@@ -36,10 +36,25 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
 > Modules to make various GPS devices behave as a file system. Simple to do when they already are a file system, but not so obvious when they connect via serial port.
 
 - hj.fe
+
+> The front-end (fe) is driven with twisted and a browser.
+
 - hj.tool
+
+> Contains tools to help uses interface with this project on the command line.
+
 - hj..util
+
+> Contains the modules that are used within this project.
 
 ## System dependencies
 1. python3
 2. twisted
 3. gdal
+
+## To-Do List
+[ ] start tool for firing up the front-end
+    [ ] invoke later (with delay) a browser connected to this front-end
+    [ ] invoke twisted to handle the web events for the front-end
+
+    
