@@ -59,7 +59,7 @@ class Type(enum.Enum):
     garmin_etrex_10 = 1
     pass
 
-def close (di : Interface, clear : bool=False):
+def close (di : Interface, clear : bool=False) -> None:
     if clear: di._clear()
     di._close()
     return
