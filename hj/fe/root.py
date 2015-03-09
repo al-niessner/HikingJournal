@@ -11,6 +11,16 @@ class Root(twisted.web.resource.Resource):
         return
     pass
 
+class FavIcon(twisted.web.resource.Resource):
+    isLeaf = True
+    def render_GET (self, request):
+        data = b''
+        with open (os.path.abspath (os.path.join (os.path.dirname (__file__),
+                                                  'resources/favicon.ico')),
+                   'rb') as f: data = f.read()
+        return data
+    pass
+
 class FrontPage(twisted.web.resource.Resource):
     isLeaf = True
     def render_GET (self, request): return b'''
@@ -22,16 +32,6 @@ class FrontPage(twisted.web.resource.Resource):
   </body>
 </html>
 '''
-    pass
-
-class FavIcon(twisted.web.resource.Resource):
-    isLeaf = True
-    def render_GET (self, request):
-        data = b''
-        with open (os.path.abspath (os.path.join (os.path.dirname (__file__),
-                                                  'resources/favicon.ico')),
-                   'rb') as f: data = f.read()
-        return data
     pass
 
 def run (port : int) -> None:
