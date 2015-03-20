@@ -21,14 +21,39 @@ class FavIcon(twisted.web.resource.Resource):
         return data
     pass
 
+class Stop(twisted.web.resource.Resource):
+    isLeaf = True
+    def render_GET (self, request):
+        stop()
+        return b''
+    pass
+
 class FrontPage(twisted.web.resource.Resource):
     isLeaf = True
     def render_GET (self, request): return b'''
 <!DOCTYPE html>
 <html>
+  <head>
+    <script language="javascript" type="text/javascript"> 
+      function frontEndShutdown() { 
+      document.getElementById("stop_server").submit();
+      window.open('','_parent',''); 
+      window.close();
+      } 
+    </script>
+  </head>
   <body>
     <title>Hiking Journal</title>
     <h1>Cover</h1>
+    <form action="input_device">
+      <select name="device">
+        <option value="0">Local File</option>
+        <option value="1">Garmin eTrex 10</option>
+      </select>
+      <input type="submit" value="Connect"/>
+    </form>
+    <input type="button" value="Shutdown and Close" onclick="frontEndShutdown();"/>
+    <form id="stop_server" action="/stop"><input type="hidden" value="Stop"/></form>
   </body>
 </html>
 '''
@@ -39,7 +64,12 @@ def run (port : int) -> None:
     root = Root()
     root.putChild (b'', FrontPage())
     root.putChild (b'favicon.ico', FavIcon())
+    root.putChild (b'stop', Stop())
     factory = twisted.web.server.Site(root)
     twisted.internet.reactor.listenTCP (port, factory)
     twisted.internet.reactor.run()
+    return
+
+def stop() -> None:
+    twisted.internet.reactor.stop()
     return
