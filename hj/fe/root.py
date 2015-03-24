@@ -1,36 +1,17 @@
 '''Root of the hiking journal'''
 
+import cherrypy
+import cherrypy.wsgiserver
+import flask
+import hj.fe.root
 import os
-import twisted.web.resource
-import twisted.web.server
 
-class Root(twisted.web.resource.Resource):
-    def getChild (self, name, request):
-        print ('Root.getChild().name:    ' + str(name))
-        print ('Root.getChild().request: ' + str(request))
-        return
-    pass
+fapp = flask.Flask(__name__)
+fapp.debug = True
 
-class FavIcon(twisted.web.resource.Resource):
-    isLeaf = True
-    def render_GET (self, request):
-        data = b''
-        with open (os.path.abspath (os.path.join (os.path.dirname (__file__),
-                                                  'resources/favicon.ico')),
-                   'rb') as f: data = f.read()
-        return data
-    pass
-
-class Stop(twisted.web.resource.Resource):
-    isLeaf = True
-    def render_GET (self, request):
-        stop()
-        return b''
-    pass
-
-class FrontPage(twisted.web.resource.Resource):
-    isLeaf = True
-    def render_GET (self, request): return b'''
+@fapp.route ('/')
+def _root() -> str:
+    return b'''
 <!DOCTYPE html>
 <html>
   <head>
@@ -57,19 +38,14 @@ class FrontPage(twisted.web.resource.Resource):
   </body>
 </html>
 '''
-    pass
+
+@fapp.route ('/stop')
+def _stop() -> None:
+    _server.stop()
+    return b''
 
 def run (port : int) -> None:
-    '''Start up the twisted engine as the front-end'''
-    root = Root()
-    root.putChild (b'', FrontPage())
-    root.putChild (b'favicon.ico', FavIcon())
-    root.putChild (b'stop', Stop())
-    factory = twisted.web.server.Site(root)
-    twisted.internet.reactor.listenTCP (port, factory)
-    twisted.internet.reactor.run()
-    return
-
-def stop() -> None:
-    twisted.internet.reactor.stop()
+    d = cherrypy.wsgiserver.WSGIPathInfoDispatcher({'/': fapp})
+    hj.fe.root._server = cherrypy.wsgiserver.CherryPyWSGIServer(('0.0.0.0', port), d)
+    _server.start()
     return
