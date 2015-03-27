@@ -9,6 +9,8 @@ import os
 fapp = flask.Flask(__name__)
 fapp.debug = True
 
+import hj.fe.pages
+
 @fapp.route ('/')
 def _root() -> str:
     return b'''
@@ -25,16 +27,14 @@ def _root() -> str:
   </head>
   <body>
     <title>Hiking Journal</title>
-    <h1>Cover</h1>
-    <form action="input_device">
-      <select name="device">
-        <option value="0">Local File</option>
-        <option value="1">Garmin eTrex 10</option>
-      </select>
-      <input type="submit" value="Connect"/>
-    </form>
-    <input type="button" value="Shutdown and Close" onclick="frontEndShutdown();"/>
+    <form action="/pages/cover" target="workspace"><input type="submit" value="Home"/></form>
+    <form action="/import/device" target="workspace"><input type="submit" value="Import"/></form>
+    <form action="/entry/scribe" target="workspace"><input type="submit" value="Scribe Entry"/></form>
+    <input type="button" value="Quit" onclick="frontEndShutdown();"/>
     <form id="stop_server" action="/stop"><input type="hidden" value="Stop"/></form>
+    <iframe name="workspace"
+            src="/pages/cover"
+            style="border:medium solid black; height:90vh; width:90%;"/>
   </body>
 </html>
 '''
