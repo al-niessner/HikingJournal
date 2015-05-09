@@ -11,12 +11,12 @@ def input_device() -> bytes:
    value as selected. */
 function input_dev_init()
 {
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.onreadystatechange = function()
+  var connection = new XMLHttpRequest();
+  connection.onreadystatechange = function()
   {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+    if (connection.readyState == 4 && connection.status == 200)
     {
-      var devices = JSON.parse(xmlhttp.responseText);
+      var devices = JSON.parse(connection.responseText);
       var opts = "";
       for (i=0 ; i < devices.all.length ; i++)
       {
@@ -30,7 +30,7 @@ function input_dev_init()
       input_dev_change();
     }
   }
-  xmlhttp.open("GET", "/input/device" , true);
-  xmlhttp.send();
+  connection.open("GET", "/input/device" , true);
+  connection.send();
 }
 '''
