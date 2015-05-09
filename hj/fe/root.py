@@ -9,32 +9,37 @@ import os
 fapp = flask.Flask(__name__)
 fapp.debug = True
 
+import hj.fe.forms
+import hj.fe.js
+import hj.fe.input
 import hj.fe.pages
 
 @fapp.route ('/')
-def _root() -> str:
+def _root() -> bytes:
     return b'''
 <!DOCTYPE html>
 <html>
   <head>
-    <script language="javascript" type="text/javascript"> 
-      function frontEndShutdown() { 
-      document.getElementById("stop_server").submit();
-      window.open('','_parent',''); 
-      window.close();
+    <script> 
+      function frontEndShutdown()
+      {
+        document.getElementById("stop_server").submit();
+        window.close();
       } 
     </script>
+    <title>Hiking Journal</title>
   </head>
   <body>
-    <title>Hiking Journal</title>
-    <form action="/pages/cover" target="workspace"><input type="submit" value="Home"/></form>
-    <form action="/import/device" target="workspace"><input type="submit" value="Import"/></form>
-    <form action="/entry/scribe" target="workspace"><input type="submit" value="Scribe Entry"/></form>
-    <input type="button" value="Quit" onclick="frontEndShutdown();"/>
+    <form action="/pages/cover" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Home"/></form>
+    <form action="/import" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Import"/></form>
+    <form action="/scribe" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Scribe Entry"/></form>
+    <form action="/setup" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Settup"/></form>
+    <input style="float:left" type="button" value="Quit" onclick="frontEndShutdown();"/>
     <form id="stop_server" action="/stop"><input type="hidden" value="Stop"/></form>
-    <iframe name="workspace"
+    <iframe id="workspace"
+            name="workspace"
             src="/pages/cover"
-            style="border:medium solid black; height:90vh; width:90%;"/>
+            style="border:medium solid black; height:95vh; width:90%;"/>
   </body>
 </html>
 '''
