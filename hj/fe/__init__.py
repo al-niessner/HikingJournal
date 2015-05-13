@@ -11,7 +11,7 @@ fapp = flask.Flask(__name__)
 fapp.debug = True
 
 @fapp.route ('/')
-def _root() -> bytes: return _static ('html/welcome.html')
+def _root() -> bytes: return _static ('/html/welcome.html')
 
 def _static (fn : str) -> bytes:
     while fn.startswith ('/'): fn = fn[1:]
