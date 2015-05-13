@@ -1,7 +1,7 @@
 '''Resused forms from various parts of the GUI
 '''
 
-from hj.fe.root import fapp
+from hj.fe import fapp
 
 import json
 import hj.config

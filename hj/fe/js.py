@@ -1,7 +1,7 @@
 '''Reused scripts for the GUI
 '''
 
-from hj.fe.root import fapp
+from hj.fe import fapp
 
 
 @fapp.route ('/input_dev.js')

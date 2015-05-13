@@ -8,7 +8,7 @@ import sys
 def main (config : str, port : int) -> None:
     hj.config.load (config)
     hj.fe.util.conjure (port)
-    hj.fe.root.run (port)
+    hj.fe.run (port)
     hj.config.save (config)
     return
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     sys.path.append (os.path.abspath (os.path.join (os.path.dirname (__file__),
                                                     '../..')))
     import hj.config
-    import hj.fe.root
+    import hj.fe
     import hj.fe.util
 
     ap = argparse.ArgumentParser(description='Start the hiking journal. The journal uses the browser as its rendering engine. It uses the twisted platform to tie browswer actions back into modifying the journal data itself.')

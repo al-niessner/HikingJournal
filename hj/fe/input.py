@@ -1,7 +1,7 @@
 '''GUI pages for the various sources
 '''
 
-from hj.fe.root import fapp
+from hj.fe import fapp
 
 import flask
 import hj.fe.forms

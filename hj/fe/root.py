@@ -1,20 +1,7 @@
 '''Root of the hiking journal'''
 
-import cherrypy
-import cherrypy.wsgiserver
-import flask
-import hj.fe.root
-import os
 
-fapp = flask.Flask(__name__)
-fapp.debug = True
-
-import hj.fe.forms
-import hj.fe.js
-import hj.fe.input
-import hj.fe.pages
-
-@fapp.route ('/')
+#@fapp.route ('/')
 def _root() -> bytes:
     return b'''
 <!DOCTYPE html>
@@ -44,13 +31,3 @@ def _root() -> bytes:
 </html>
 '''
 
-@fapp.route ('/stop')
-def _stop() -> None:
-    _server.stop()
-    return b''
-
-def run (port : int) -> None:
-    d = cherrypy.wsgiserver.WSGIPathInfoDispatcher({'/': fapp})
-    hj.fe.root._server = cherrypy.wsgiserver.CherryPyWSGIServer(('0.0.0.0', port), d)
-    _server.start()
-    return
