@@ -2,7 +2,7 @@ import hj.device
 import os
 
 class Interface(hj.device.Interface):
-    def __init__ (self, mp, rloc='Garmin/GPX', suffix='.gpx'):
+    def __init__ (self, mp:str, rloc:str='Garmin/GPX', suffix:str='.gpx'):
         '''Construct an interface that allows access to the Garmin ETrex-10
 
         mp : mount point

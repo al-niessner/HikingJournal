@@ -4,8 +4,8 @@ import re
 
 class Interface(hj.device.Interface):
     '''Looks in the local file system for GPX files'''
-    def __init__ (self, dir, follow=False, recurse=False,
-                  rid='^[Rr]oute.*', tid='^[Tt]rack.*', wid='^[Ww]aypoint.*'):
+    def __init__ (self, dir:str, follow:bool=False, recurse:bool=False,
+                  rid:str='^[Rr]oute.*', tid:str='^[Tt]rack.*', wid:str='^[Ww]aypoint.*'):
         '''Construct an interface that allows access to the local file system
 
         dir : directory to look within
@@ -18,7 +18,7 @@ class Interface(hj.device.Interface):
         '''
 
         hj.device.Interface.__init__ (self)
-        self.__base_dir = dir
+        self.__base_dir = os.path.expanduser (os.path.expandvars (dir))
         self.__follow = follow
         self.__recurse = recurse
         self.__rfns = []

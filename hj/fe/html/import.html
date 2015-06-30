@@ -5,24 +5,27 @@
     <script src="/scripts/import.js"></script>
     <title>Input Tracks and Waypoints</title>
   </head> 
-  <body>
-%(dev_form)s
+  <body onload="import_init();">
+    %(dev_form)s
     <form>
-      <label for="routes">Routes</label>
-      <select id="routes" multiple="multiple" name="routes">
-        <option value="g">g</option>
-        <option value="h">h</option>
-      </select>
-      <label for="tracks">Tracks</label>
-      <select id="tracks" multiple="multiple" name="tracks">
-        <option value="a">a</option>
-        <option value="b">b</option>
-      </select>
-      <label for="waypoints">Waypoints</label>
-      <select id="waypoints" multiple="multiple" name="waypoints">
-        <option value="c">c</option>
-        <option value="d">d</option>
-      </select>
+      <fieldset>
+        <legend>GPS Data</legend>
+        <label for="routes">Routes</label>
+        <select id="routes" multiple="multiple" name="routes">
+          <option value="g">g</option>
+          <option value="h">h</option>
+        </select>
+        <label for="tracks">Tracks</label>
+        <select id="tracks" multiple="multiple" name="tracks">
+          <option value="a">a</option>
+          <option value="b">b</option>
+        </select>
+        <label for="waypoints">Waypoints</label>
+        <select id="waypoints" multiple="multiple" name="waypoints">
+          <option value="c">c</option>
+          <option value="d">d</option>
+        </select>
+      </fieldset>
     </form>
   </body>
 </html> 
