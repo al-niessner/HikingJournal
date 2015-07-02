@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 
-def main (config : str, port : int) -> None:
+def main (config:str, port:int)->None:
     hj.config.load (config)
     hj.fe.util.conjure (port)
     hj.fe.run (port)
@@ -15,9 +15,7 @@ def main (config : str, port : int) -> None:
 if __name__ == '__main__':
     sys.path.append (os.path.abspath (os.path.join (os.path.dirname (__file__),
                                                     '../..')))
-    import hj.config
-    import hj.fe
-    import hj.fe.util
+    import hj.tool.start
 
     ap = argparse.ArgumentParser(description='Start the hiking journal. The journal uses the browser as its rendering engine. It uses the twisted platform to tie browswer actions back into modifying the journal data itself.')
     ap.add_argument ('-c', '--config-file', default='${HOME}/.hj.cnf',
@@ -25,10 +23,10 @@ if __name__ == '__main__':
     ap.add_argument ('-p', '--port', default=8080, type=int,
                      help='the socket port number for browser <-> journal communications [%(default)s]')
     args = ap.parse_args()
-    main (args.config_file, args.port)
+    hj.tool.start.main (args.config_file, args.port)
     pass
 else:
     import hj.config
-    import hj.fe.root
+    import hj.fe
     import hj.fe.util
     pass

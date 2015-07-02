@@ -8,6 +8,16 @@ import hj.config
 import hj.device
 import inspect
 
+def extras (device, kwds):
+    l = {}
+    exec ('import hj.device.' + device + ' ; d = hj.device. ' +
+          device + '.Interface', globals(), l)
+    for p in filter (lambda p:p.name != 'self',
+                     inspect.signature (l['d'].__init__).parameters.values()):
+        if p.name in kwds: kwds[p.name] = p.annotation (kwds[p.name])
+        pass
+    return kwds
+
 def input_device()->bytes:
     return b'''
 <form>
@@ -38,17 +48,14 @@ def input_device_extras (device:str) -> bytes:
         if isinstance (val, inspect._empty): val = None
 
         if p.annotation == bool:
-            result += ('<input %s name="%s" type="checkbox"> %s </input><br/>' %
-                       ('checked' if p.default else '', p.name, label))
+            result += ('<input %s name="%s" type="checkbox" value="%s" onclick="input_bool_handler.call(this);"> %s </input><br/>' %
+                       ('checked' if p.default else '',
+                        p.name, str(val).lower(), label))
         elif p.annotation == str:
             result += ('%s: <input name="%s" type="text" value="%s"/><br/>' %
                        (label, p.name, str (val)))
         else: result += '<h3>Un-handled type: %s</h3>' % str (p.annotation)
         pass
-
-    if 0 < len (result):
-        result = '<form>' + result + '<button onclick="input_dev_ready();" type="button">Scan</form>'
-
     return result.encode()
 
 @fapp.route ('/input/device')

@@ -1,5 +1,6 @@
-/* load the allowable names for the selection and set the current
-   value as selected. */
+
+function input_bool_handler()
+{ this.value = (!Boolean(this.value === "true")).toString(); }
 
 function input_dev_change()
 {
@@ -9,12 +10,27 @@ function input_dev_change()
         if (connection.readyState == 4 && connection.status == 200)
         {
             var doc = document.getElementById ("input_device_extras");
-            doc.innerHTML = connection.responseText;
+
+            if (0 < connection.responseText.length)
+            { doc.innerHTML = "<form>" + connection.responseText + '<button onclick="input_dev_ready();" type="button">Scan</form>'; }
             input_dev_ready();
         }
     }
     connection.open("PUT", "/input/extras/" + document.getElementById ("input_device").value, true);
     connection.send();
+}
+
+function input_dev_extras()
+{
+    var doc = document.getElementById ("input_device_extras");
+    var extras = {};
+
+    for (c = 0 ; c < doc.children.length ; c++)
+    {
+        if (doc.children[c].hasAttribute ("name"))
+        {extras[doc.children[c].name] = doc.children[c].value;}
+    }
+    return extras;
 }
 
 function input_dev_init()

@@ -26,13 +26,12 @@ def initialize():
     return
 
 def load (fn):
+    fn = os.path.expanduser (os.path.expandvars (fn))
     initialize()
     if os.path.exists (fn):
-        fn = os.path.expanduser (os.path.expandvars (fn))
-        with open (fn, 'wt') as f:
+        with open (fn, 'rt') as f:
             archive = json.load (f)
-            for k in archive.keys(): eval ('hj.config.' + k + ' = archive["' +
-                                           k + '"]', globals(), locals())
+            for k in archive.keys(): setattr (hj.config, k, archive[k])
             pass
         pass
 
@@ -42,7 +41,7 @@ def load (fn):
 
 def save (fn):
     archive = {}
-    for n in _dir(): archive[n] = eval ('hj.config.' + n, globals(), locals())
+    for n in _dir(): archive[n] = getattr (hj.config, n)
     fn = os.path.expanduser (os.path.expandvars (fn))
     with open (fn, 'wt') as f: json.dump (archive, f, indent=2)
     return

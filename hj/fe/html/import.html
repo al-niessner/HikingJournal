@@ -10,21 +10,24 @@
     <form>
       <fieldset>
         <legend>GPS Data</legend>
-        <label for="routes">Routes</label>
+        <label for="routes">Routes</label><br/>
         <select id="routes" multiple="multiple" name="routes">
           <option value="g">g</option>
           <option value="h">h</option>
-        </select>
-        <label for="tracks">Tracks</label>
+        </select><br/><br/>
+        <label for="tracks">Tracks</label><br/>
         <select id="tracks" multiple="multiple" name="tracks">
           <option value="a">a</option>
           <option value="b">b</option>
-        </select>
-        <label for="waypoints">Waypoints</label>
+        </select><br/><br/>
+        <label for="waypoints">Waypoints</label><br/>
         <select id="waypoints" multiple="multiple" name="waypoints">
           <option value="c">c</option>
           <option value="d">d</option>
         </select>
+        <br/>
+        <button onclick="import_copy (false);">Copy but keep data on device</button>
+        <button onclick="import_copy (true);">Copy then clear device</button>
       </fieldset>
     </form>
   </body>

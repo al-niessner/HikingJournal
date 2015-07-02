@@ -29,6 +29,15 @@ class Interface(object):
     so devices I have examined.
     '''
 
+    def __exit__(mgr, *args):
+        '''for the "with" clause'''
+        mgr._close()
+        return False # does nothing by default so overriding is not required
+    
+    def __enter__(mgr):
+        '''for the "with" clause'''
+        return mgr # does nothing by default so overriding is not required
+
     def _clear(self):
         '''clear the device memory'''
         raise NotImplementedError()
