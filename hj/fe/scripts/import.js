@@ -74,7 +74,8 @@ function input_dev_ready()
                 
                 for (o = 0 ; o < data[args[t]].length ; o++)
                 {opts += "<option selected>" + data[args[t]][o] + "</option>";}
-            list.innerHTML = opts;
+                list.innerHTML = opts;
+                console.log (opts);
             }
             console.log ('scan');
         }

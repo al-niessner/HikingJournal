@@ -6,30 +6,35 @@
     <title>Input Tracks and Waypoints</title>
   </head> 
   <body onload="import_init();">
-    %(dev_form)s
-    <form>
-      <fieldset>
-        <legend>GPS Data</legend>
-        <label for="routes">Routes:</label><br/>
-        <select id="routes" multiple="multiple" name="routes">
-          <option value="g">g</option>
-          <option value="h">h</option>
-        </select><br/><br/>
-        <label for="tracks">Tracks:</label><br/>
-        <select id="tracks" multiple="multiple" name="tracks">
-          <option value="a">a</option>
-          <option value="b">b</option>
-        </select><br/><br/>
-        <label for="waypoints">Waypoints:</label><br/>
-        <select id="waypoints" multiple="multiple" name="waypoints">
-          <option value="c">c</option>
-          <option value="d">d</option>
-        </select>
-        <br/>
-        <button onclick="import_copy (false);" type="button">Copy</button>
-        <button onclick="import_copy (true);" type="button">Move</button>
-        <button onclick="import_wipe();" type="button">Wipe</button>
-      </fieldset>
-    </form>
+    <div id="allow">
+      %(dev_form)s
+      <form>
+        <fieldset>
+          <legend>GPS Data</legend>
+          <label for="routes">Routes:</label><br/>
+          <select id="routes" multiple="multiple" name="routes">
+            <option value="g">g</option>
+            <option value="h">h</option>
+          </select><br/><br/>
+          <label for="tracks">Tracks:</label><br/>
+          <select id="tracks" multiple="multiple" name="tracks">
+            <option value="a">a</option>
+            <option value="b">b</option>
+          </select><br/><br/>
+          <label for="waypoints">Waypoints:</label><br/>
+          <select id="waypoints" multiple="multiple" name="waypoints">
+            <option value="c">c</option>
+            <option value="d">d</option>
+          </select>
+          <br/>
+          <button onclick="import_copy (false);" type="button">Copy</button>
+          <button onclick="import_copy (true);" type="button">Move</button>
+          <button onclick="import_wipe();" type="button">Wipe</button>
+        </fieldset>
+      </form>
+    </div>
+    <div hidden id="waiting">
+      <h1>Busy Working...</h1>
+    </div>
   </body>
 </html> 

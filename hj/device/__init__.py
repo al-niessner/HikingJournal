@@ -1,6 +1,7 @@
 '''Front end factory for reading a variety of devices
 '''
 import enum
+import shutil
 
 class Interface(object):
     '''All GPS units are supported through this interface
@@ -45,9 +46,23 @@ class Interface(object):
         '''given the interface a change to close the device if needed'''
         return # does nothing by default so overriding is not required
     
-    def _load(self):
-        '''load the data from the device'''
-        return # does nothing by default so overriding is not required
+    def copy (self, dfn:str, lfn:str):
+        '''copy a file from the device to the local file system
+
+        dfn : device file name
+        lfn : local file name
+        '''
+        shutil.copy (dfn, lfn)
+        return
+
+    def move (self, dfn:str, lfn:str):
+        '''move a file from the device to the local file system
+
+        dfn : device file name
+        lfn : local file name
+        '''
+        shutil.move (dfn, lfn)
+        return
 
     def routes(self):
         '''a generator that yields one route filename at a time'''
@@ -56,7 +71,11 @@ class Interface(object):
     def tracks(self):
         '''a generator that yields one track filename at a time'''
         raise NotImplementedError()
-    
+
+    def update (self):
+        '''update the data loaded from the device'''
+        raise NotImplementedError()
+        
     def waypoints(self):
         '''a generator that yields one waypoint filename at a time'''
         raise NotImplementedError()
@@ -82,6 +101,6 @@ def open (t : Type, **kwds) -> Interface:
     if len (kwds) == 0: help (I)
     else:
         result = I(**kwds)
-        result._load()
+        result.update()
         pass
     return result

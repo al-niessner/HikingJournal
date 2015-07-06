@@ -10,7 +10,6 @@ import hj.fe.forms
 import hj.fe.input
 import json
 import os
-import shutil
 
 _active = None
 _signature = None
@@ -43,13 +42,14 @@ def import_move_data()->bytes:
     device_info = xfer_info['device']
     dt = hj.device.Type[device_info['type']]
     extras = hj.fe.forms.extras (dt.name, device_info['extras'])
-    xfer = shutil.move if xfer_info['move'] else shutil.copy
     with _current (dt, **extras) as device:
+        xfer = device.move if xfer_info['move'] else device.copy
         for fn in (xfer_info['routes'] +
                    xfer_info['tracks'] + xfer_info['waypts']):
             bn = os.path.basename (fn)
             xfer (fn, os.path.join (hj.config.wdir, bn))
             pass
+        device.update()
         pass
     return b''
 
@@ -58,16 +58,13 @@ def import_scan_device()->bytes:
     device_info = json.loads (flask.request.data.decode())
     dt = hj.device.Type[device_info['type']]
     extras = hj.fe.forms.extras (dt.name, device_info['extras'])
-    routes,tracks = ['device failed'],['device failed']
-    waypoints = ['device failed']
+    r,t,w = ['device failed'],['device failed'],['device failed']
     with _current (dt, **extras) as device:
-        routes = [r for r in device.routes()]
-        tracks = [t for t in device.tracks()]
-        waypoints = [w for w in device.waypoints()]
+        r = [r for r in device.routes()]
+        t = [t for t in device.tracks()]
+        w = [w for w in device.waypoints()]
         pass
-    return json.dumps ({'routes':routes,
-                        'tracks':tracks,
-                        'waypts':waypoints}).encode()
+    return json.dumps ({'routes':r, 'tracks':t, 'waypts':w}).encode()
 
 @fapp.route ('/import/wipe', methods=['PUT'])
 def import_wipe_device()->bytes:

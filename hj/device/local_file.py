@@ -1,6 +1,7 @@
 import hj.device
 import os
 import re
+import shutil
 
 class Interface(hj.device.Interface):
     '''Looks in the local file system for GPX files'''
@@ -21,11 +22,8 @@ class Interface(hj.device.Interface):
         self.__base_dir = os.path.expanduser (os.path.expandvars (dir))
         self.__follow = follow
         self.__recurse = recurse
-        self.__rfns = []
         self.__rregex = re.compile (rid)
-        self.__tfns = []
         self.__tregex = re.compile (tid)
-        self.__wfns = []
         self.__wregex = re.compile (wid)
         return
 
@@ -45,8 +43,20 @@ class Interface(hj.device.Interface):
             pass
         return
     
-    def _load(self):
+    def routes(self):
+        for rfn in self.__rfns: yield rfn
+        return
+    
+    def tracks(self):
+        for tfn in self.__tfns: yield tfn
+        return
+    
+    def update (self):
         '''walk the directories and find all of the items'''
+        self.__rfns = []
+        self.__tfns = []
+        self.__wfns = []
+
         if self.__recurse:
             for p,d,f in os.walk (self.__base_dir, followlinks=self.__follow):
                 self._add (p, f)
@@ -59,14 +69,6 @@ class Interface(hj.device.Interface):
         self.__wfns.sort()
         return
 
-    def routes(self):
-        for rfn in self.__rfns: yield rfn
-        return
-    
-    def tracks(self):
-        for tfn in self.__tfns: yield tfn
-        return
-    
     def waypoints(self):
         for wfn in self.__wfns: yield wfn
         return
