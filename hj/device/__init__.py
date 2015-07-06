@@ -31,7 +31,6 @@ class Interface(object):
 
     def __exit__(mgr, *args):
         '''for the "with" clause'''
-        mgr._close()
         return False # does nothing by default so overriding is not required
     
     def __enter__(mgr):

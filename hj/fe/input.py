@@ -7,9 +7,30 @@ import flask
 import hj.config
 import hj.fe
 import hj.fe.forms
+import hj.fe.input
 import json
 import os
 import shutil
+
+_active = None
+_signature = None
+def _current (dt:hj.device.Type, **extras)->hj.device.Interface:
+    signature = ';'.join ([dt.name] + [str(k) + '=' + str(v) for k,v in
+                                       sorted (extras.items(),
+                                               key=lambda i:i[0])])
+
+    if _active is None:
+        hj.fe.input._active = hj.device.open (dt, **extras)
+        hj.fe.input._signature = signature
+        pass
+
+    if signature != hj.fe.input._signature:
+        hj.device.close (_active)
+        hj.fe.input._active = hj.device.open (dt, **extras)
+        hj.fe.input._signature = signature
+        pass
+    
+    return hj.fe.input._active
 
 @fapp.route ('/import')
 def import_gps()->bytes:
@@ -23,7 +44,7 @@ def import_move_data()->bytes:
     dt = hj.device.Type[device_info['type']]
     extras = hj.fe.forms.extras (dt.name, device_info['extras'])
     xfer = shutil.move if xfer_info['move'] else shutil.copy
-    with hj.device.open (dt, **extras) as device:
+    with _current (dt, **extras) as device:
         for fn in (xfer_info['routes'] +
                    xfer_info['tracks'] + xfer_info['waypts']):
             bn = os.path.basename (fn)
@@ -39,7 +60,7 @@ def import_scan_device()->bytes:
     extras = hj.fe.forms.extras (dt.name, device_info['extras'])
     routes,tracks = ['device failed'],['device failed']
     waypoints = ['device failed']
-    with hj.device.open (dt, **extras) as device:
+    with _current (dt, **extras) as device:
         routes = [r for r in device.routes()]
         tracks = [t for t in device.tracks()]
         waypoints = [w for w in device.waypoints()]
@@ -53,5 +74,5 @@ def import_wipe_device()->bytes:
     device_info = json.loads (flask.request.data.decode())
     dt = hj.device.Type[device_info['type']]
     extras = hj.fe.forms.extras (dt.name, device_info['extras'])
-    with hj.device.open (dt, **extras) as device: hj.device.close (device, True)
+    with _current (dt, **extras) as device: hj.device.close (device, True)
     return b''
