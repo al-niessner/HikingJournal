@@ -60,6 +60,7 @@ def import_scan_device()->bytes:
     extras = hj.fe.forms.extras (dt.name, device_info['extras'])
     r,t,w = ['device failed'],['device failed'],['device failed']
     with _current (dt, **extras) as device:
+        device.update()
         r = [r for r in device.routes()]
         t = [t for t in device.tracks()]
         w = [w for w in device.waypoints()]

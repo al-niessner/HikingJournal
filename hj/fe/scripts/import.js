@@ -22,9 +22,12 @@ function import_copy (clear)
     {
         if (connection.readyState == 4 && connection.status == 200)
         {
-            console.log ("done moving data...");
+            waiting.setAttribute ("hidden","");
+            allow.removeAttribute ("hidden");
         }
     }
+    allow.setAttribute ("hidden","");
+    waiting.removeAttribute ("hidden");
     data.device = device;
     connection.open("PUT", "/import/move", true);
     connection.send(JSON.stringify (data));
@@ -37,27 +40,33 @@ function import_init()
 
 function import_wipe()
 {
-    console.log ("Wipe the device...");
+    var allow = document.getElementById ("allow");
     var connection = new XMLHttpRequest();
     var device = {extras:input_dev_extras(),
                   type:document.getElementById ("input_device").value};
+    var waiting = document.getElementById ("waiting");
 
     connection.onreadystatechange = function()
     {
         if (connection.readyState == 4 && connection.status == 200)
         {
-            console.log ("done wiping data...");
+            waiting.setAttribute ("hidden","");
+            allow.removeAttribute ("hidden");
         }
     }
+    allow.setAttribute ("hidden","");
+    waiting.removeAttribute ("hidden");
     connection.open("PUT", "/import/wipe", true);
     connection.send(JSON.stringify (device));
 }
 
 function input_dev_ready()
 {
+    var allow = document.getElementById ("allow");
     var connection = new XMLHttpRequest();
     var device = {extras:input_dev_extras(),
                   type:document.getElementById ("input_device").value};
+    var waiting = document.getElementById ("waiting");
 
     connection.onreadystatechange = function()
     {
@@ -75,11 +84,13 @@ function input_dev_ready()
                 for (o = 0 ; o < data[args[t]].length ; o++)
                 {opts += "<option selected>" + data[args[t]][o] + "</option>";}
                 list.innerHTML = opts;
-                console.log (opts);
             }
-            console.log ('scan');
+            waiting.setAttribute ("hidden","");
+            allow.removeAttribute ("hidden");
         }
     }
+    allow.setAttribute ("hidden","");
+    waiting.removeAttribute ("hidden");
     connection.open("PUT", "/import/scan", true);
     connection.send(JSON.stringify (device));
 }
