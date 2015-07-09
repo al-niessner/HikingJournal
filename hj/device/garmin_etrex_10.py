@@ -12,10 +12,7 @@ class Interface(hj.device.Interface):
         hj.device.Interface.__init__ (self)
         self.__mp = mp
         self.__rloc = rloc
-        self.__rregex = re.compile (rid)
         self.__suffix = suffix
-        self.__tregex = re.compile (tid)
-        self.__wregex = re.compile (wid)
         return
     
     def _clear(self):
