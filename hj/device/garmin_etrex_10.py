@@ -2,17 +2,12 @@ import hj.device
 import os
 
 class Interface(hj.device.Interface):
-    def __init__ (self, mp:str, rloc:str='Garmin/GPX', suffix:str='.gpx',
-                  rid:str='^[Rr]oute.*', tid:str='^[Tt]rack.*', wid:str='^[Ww]aypoint.*'):
+    def __init__ (self, mp:str, rloc:str='Garmin/GPX', suffix:str='.gpx'):
         '''Construct an interface that allows access to the Garmin ETrex-10
 
         mp : mount point
         rloc : relative location of the GPX files on the Garmin device
         suffix : the suffix used
-        
-        rid : a regular expression for identifying route files
-        tid : a regular expression for identifying track files
-        wid : a regular expression for identifying waypoint files
         '''
         hj.device.Interface.__init__ (self)
         self.__mp = mp

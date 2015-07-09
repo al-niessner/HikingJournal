@@ -22,6 +22,7 @@ def initialize():
 
     hj.config.wdir = '${HOME}/Hiking/Journal'
     hj.config.dt = hj.device.Type.local_file.name
+    hj.config.garmin_etrex_10__mp = '${HOME}'
     hj.config.local_file__dir = '${HOME}'
     return
 
