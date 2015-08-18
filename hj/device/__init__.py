@@ -1,6 +1,7 @@
 '''Front end factory for reading a variety of devices
 '''
 import enum
+import io
 import shutil
 
 class Interface(object):
@@ -46,24 +47,22 @@ class Interface(object):
         '''given the interface a change to close the device if needed'''
         return # does nothing by default so overriding is not required
     
-    def copy (self, dfn:str, lfn:str):
-        '''copy a file from the device to the local file system
+    def fetch (self, dfn:str, move:bool)->io.StringIO:
+        '''read the specified item from the device into a string buffer
 
+        The device gets stuck with converting its native format to GPX at this
+        point. The device driver is already doing the work of making all devices
+        look like a file, so it has to go one step further and convert to the
+        actual data stream to GPX.
+        
         dfn : device file name
-        lfn : local file name
+        move : move the file erasing it from the driver view but not
+               necessarily from the hardware itself (depnds on what the hardware
+               can support, but it should not show up in the next update() call)
+        returns an io.StringIO with the GPX contents of the file
         '''
-        shutil.copy (dfn, lfn)
-        return
-
-    def move (self, dfn:str, lfn:str):
-        '''move a file from the device to the local file system
-
-        dfn : device file name
-        lfn : local file name
-        '''
-        shutil.move (dfn, lfn)
-        return
-
+        raise NotImplementedError()
+    
     def routes(self):
         '''a generator that yields one route filename at a time'''
         raise NotImplementedError()

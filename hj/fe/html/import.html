@@ -26,15 +26,27 @@
             <option value="c">c</option>
             <option value="d">d</option>
           </select>
-          <br/>
-          <button onclick="import_copy (false);" type="button">Copy</button>
-          <button onclick="import_copy (true);" type="button">Move</button>
-          <button onclick="import_wipe();" type="button">Wipe</button>
+          <br/><br/>
+          <button onclick="import_ingest (false);" type="button">Ingest Only</button>
+          <button onclick="import_ingest (true);" type="button">Ingest then Clear Device Memory</button>
+          <button onclick="import_wipe();" type="button">Just Clear Device Memory</button>
         </fieldset>
       </form>
     </div>
     <div hidden id="waiting">
       <h1>Busy Working...</h1>
+    </div>
+    <div hidden id="update">
+      <form>
+        <fieldset>
+          <legend>Update GPS Info</legend>
+          <label for="rdata">Route:</label><br/>
+          <label for="tdata">Track:</label><br/>
+          <label for="wdata">Waypoint:</label><br/>
+          <br/>
+          <button onclick="import_continue()" type="button">Continue</button>
+        </fieldset>
+      </form>
     </div>
   </body>
 </html> 

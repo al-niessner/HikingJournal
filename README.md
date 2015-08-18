@@ -39,7 +39,7 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
   - [ ] invoke later (with delay) a browser connected to this front-end
   - [ ] invoke twisted to handle the web events for the front-end
 - [ ] ideal workflow step 1
-  - [ ] build a display to connect device to input
+  - [x] build a display to connect device to input
   - [ ] manipulate tracks
     - [ ] change labels
     - [ ] add descriptions

@@ -1,12 +1,17 @@
 
-function import_copy (clear)
+var ingest_content;
+
+function import_ingest (clear)
 {
+    var allow = document.getElementById ("allow");
     var connection = new XMLHttpRequest();
     var data = { move:clear, routes:[], tracks:[], waypts:[] };
     var device = {extras:input_dev_extras(),
                   type:document.getElementById ("input_device").value};
     var returns = ["routes", "tracks", "waypts"];
     var tables = ["routes", "tracks", "waypoints"];
+    var update = document.getElementById ("update");
+    var waiting = document.getElementById ("waiting");
 
     for (t = 0 ; t < tables.length ; t++)
     {
@@ -22,14 +27,16 @@ function import_copy (clear)
     {
         if (connection.readyState == 4 && connection.status == 200)
         {
+            ingest_content = JSON.parse (connection.responseText);
+
             waiting.setAttribute ("hidden","");
-            allow.removeAttribute ("hidden");
+            update.removeAttribute ("hidden");
         }
     }
     allow.setAttribute ("hidden","");
     waiting.removeAttribute ("hidden");
     data.device = device;
-    connection.open("PUT", "/import/move", true);
+    connection.open("PUT", "/import/ingest", true);
     connection.send(JSON.stringify (data));
 }
 
