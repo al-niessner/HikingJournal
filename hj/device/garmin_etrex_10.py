@@ -1,4 +1,5 @@
 import hj.device
+import io
 import os
 
 class Interface(hj.device.Interface):
@@ -20,6 +21,11 @@ class Interface(hj.device.Interface):
             if os.path.exists (fn): os.remove (fn)
             pass
         return
+
+    def fetch (self, dfn:str, move:bool)->io.TextIOBase:
+        with open (dfn, 'rt') as f: buffer = f.read()
+        if move: os.unlink (fn)
+        return io.StringIO(buffer)
 
     def routes(self):
         for rfn in self.__rfns: yield rfn

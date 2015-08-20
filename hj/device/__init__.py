@@ -47,7 +47,7 @@ class Interface(object):
         '''given the interface a change to close the device if needed'''
         return # does nothing by default so overriding is not required
     
-    def fetch (self, dfn:str, move:bool)->io.StringIO:
+    def fetch (self, dfn:str, move:bool)->io.TextIOBase:
         '''read the specified item from the device into a string buffer
 
         The device gets stuck with converting its native format to GPX at this

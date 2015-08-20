@@ -1,5 +1,40 @@
 
 var ingest_content;
+var ingest_index = 0;
+
+function import_advance (direction)
+{
+    var back = document.getElementById ("back");
+    var data;
+    var next = document.getElementById ("next");
+    var title = "Route";
+    var workspace = document.getElementById ("workspace");
+    ingest_index += direction
+
+    if (ingest_index === 0) {back.setAttribute ("disabled","");}
+    else {back.removeAttribute ("disabled");}
+
+    if (ingest_index === ingest_content.routes.length + ingest_content.tracks.length + ingest_content.waypts.length - 1)
+    {next.setAttribute ("disabled","");}
+    else {next.removeAttribute ("disabled");}
+
+    console.log (ingest_index);
+    if (ingest_content.routes.length + ingest_content.tracks.length - 1 < ingest_index)
+    {
+        data = ingest_content.waypts[ingest_index - ingest_content.routes.length - ingest_content.tracks.length];
+        title = "Waypoint";
+    }
+    else
+    {
+        if (ingest_content.routes.length - 1 < ingest_index)
+        {
+            data = ingest_content.tracks[ingest_index - ingest_content.routes.length];
+            title = "Track:";
+        }
+        else { data = ingest_content.routes[ingest_index]; }
+    }
+    console.log (data);
+}
 
 function import_ingest (clear)
 {
@@ -28,8 +63,10 @@ function import_ingest (clear)
         if (connection.readyState == 4 && connection.status == 200)
         {
             ingest_content = JSON.parse (connection.responseText);
-
+            ingest_index = 0;
+            import_advance (0);
             waiting.setAttribute ("hidden","");
+            allow.removeAttribute ("hidden");
             update.removeAttribute ("hidden");
         }
     }

@@ -40,11 +40,13 @@
       <form>
         <fieldset>
           <legend>Update GPS Info</legend>
-          <label for="rdata">Route:</label><br/>
-          <label for="tdata">Track:</label><br/>
-          <label for="wdata">Waypoint:</label><br/>
+          <div id="workspace">
+          </div>
           <br/>
-          <button onclick="import_continue()" type="button">Continue</button>
+          <button id="back" onclick="import_advance (-1);" type="button">Previous</button>
+          <button id="next" onclick="import_advance (1);" type="button">Successor</button>
+          <br/>
+          <button onclick="import_done();" type="button">Done</button>
         </fieldset>
       </form>
     </div>

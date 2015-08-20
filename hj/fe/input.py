@@ -4,6 +4,7 @@
 from hj.fe import fapp
 
 import flask
+import hashlib
 import hj.config
 import hj.fe
 import hj.fe.forms
@@ -46,10 +47,17 @@ def import_move_data()->bytes:
     with _current (dt, **extras) as device:
         for n in ['routes', 'tracks', 'waypts']:
             for fn in xfer_info[n]:
-                content[n].append ({'data':device.fetch (fn, xfer_info['move']),
-                                    'descriptions':[],
-                                    'id':fn,
-                                    'labels':[]})
+                data = device.fetch (fn, xfer_info['move']).read()
+                m = hashlib.md5()
+                m.update (data.encode())
+                s = hashlib.sha1()
+                s.update (data.encode())
+                content[n].append ({'data':data,
+                                    'description':'',
+                                    'dfn':os.path.basename (fn),
+                                    'first':{'lat':"34.152973",'lon':"-118.966017"},
+                                    'id':'%s_%s' % (m.hexdigest(), s.hexdigest()),
+                                    'label':''})
                 pass
             pass
         device.update()
