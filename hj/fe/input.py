@@ -37,8 +37,8 @@ def import_gps()->bytes:
     return hj.fe._join (hj.fe._static ('/html/import.html'),
                         dev_form=hj.fe.forms.input_device())
 
-@fapp.route ('/import/ingest', methods=['PUT'])
-def import_move_data()->bytes:
+@fapp.route ('/import/fetch', methods=['PUT'])
+def import_fetch()->bytes:
     content = {'routes':[], 'tracks':[], 'waypts':[]}
     xfer_info = json.loads (flask.request.data.decode())
     device_info = xfer_info['device']
@@ -63,6 +63,11 @@ def import_move_data()->bytes:
         device.update()
         pass
     return json.dumps (content).encode()
+
+@fapp.route ('/import/ingest', methods=['PUT'])
+def import_ingest()->bytes:
+    content = json.loads (flask.request.data.decode())
+    return flask.redirect (flask.url_for ('_root'))
 
 @fapp.route ('/import/scan', methods=['PUT'])
 def import_scan_device()->bytes:

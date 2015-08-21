@@ -18,7 +18,6 @@ function import_advance (direction)
     {next.setAttribute ("disabled","");}
     else {next.removeAttribute ("disabled");}
 
-    console.log (ingest_index);
     if (ingest_content.routes.length + ingest_content.tracks.length - 1 < ingest_index)
     {
         data = ingest_content.waypts[ingest_index - ingest_content.routes.length - ingest_content.tracks.length];
@@ -33,10 +32,16 @@ function import_advance (direction)
         }
         else { data = ingest_content.routes[ingest_index]; }
     }
-    console.log (data);
+
+    var block = '<p style="margin:0;"><b>' + title + "</b></p>";
+    block += '<p style="color:DarkGray;margin:0;text-indent:25px;"><small>device file name: ' + data.dfn + '</small></p>';
+    block += '<p style="margin:0;text-indent:25px;"><a href="http://maps.google.com/maps?zoom=12&t=m&q=loc:' + data.first.lat + '+' + data.first.lon + '" target="_blank">First GPS Location</a></p>'
+    block += '<br/><label>Label:</label><input id="label_input" style="margin-right:10%; margin-left:1%;" size="80%" type="text" value="' + data.label + '"><br>'
+    block += '<label>Description:</label><textarea id="descr_input" style="margin-right:10%; margin-left:5%;" rows="10" cols="80%">' + data.description + '</textarea>'
+    workspace.innerHTML = block;
 }
 
-function import_ingest (clear)
+function import_fetch (clear)
 {
     var allow = document.getElementById ("allow");
     var connection = new XMLHttpRequest();
@@ -73,13 +78,46 @@ function import_ingest (clear)
     allow.setAttribute ("hidden","");
     waiting.removeAttribute ("hidden");
     data.device = device;
-    connection.open("PUT", "/import/ingest", true);
+    connection.open("PUT", "/import/fetch", true);
     connection.send(JSON.stringify (data));
+}
+
+function import_ingest()
+{
+    var allow = document.getElementById ("allow");
+    var connection = new XMLHttpRequest();
+    var update = document.getElementById ("update");
+    var waiting = document.getElementById ("waiting");
+
+    allow.setAttribute ("hidden","");
+    update.setAttribute ("hidden","");
+    waiting.removeAttribute ("hidden");
+    connection.open("PUT", "/import/ingest", true);
+    connection.send(JSON.stringify (ingest_content));
 }
 
 function import_init()
 {
     input_dev_init();
+}
+
+function import_record()
+{
+    var data
+    var description = document.getElementById ("descr_input");
+    var label = document.getElementById ("label_input");
+    
+    if (ingest_content.routes.length + ingest_content.tracks.length - 1 < ingest_index)
+    {data = ingest_content.waypts[ingest_index - ingest_content.routes.length - ingest_content.tracks.length];}
+    else
+    {
+        if (ingest_content.routes.length - 1 < ingest_index)
+        {data = ingest_content.tracks[ingest_index - ingest_content.routes.length];}
+        else {data = ingest_content.routes[ingest_index];}
+    }
+
+    data.label = label.value;
+    data.description = description.value;
 }
 
 function import_wipe()
