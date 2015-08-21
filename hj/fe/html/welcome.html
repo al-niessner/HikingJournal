@@ -11,14 +11,14 @@
     <title>Hiking Journal</title>
   </head>
   <body>
-    <form action="/pages/cover" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Home"/></form>
-    <form action="/import" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Import"/></form>
-    <form action="/scribe" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Scribe Entry"/></form>
-    <form action="/setup" style="float:left ; margin-right:10px" target="workspace"><input type="submit" value="Settup"/></form>
+    <form action="/pages/cover" style="float:left ; margin-right:10px" target="main_view"><input type="submit" value="Home"/></form>
+    <form action="/import" style="float:left ; margin-right:10px" target="main_view"><input type="submit" value="Import"/></form>
+    <form action="/scribe" style="float:left ; margin-right:10px" target="main_view"><input type="submit" value="Scribe Entry"/></form>
+    <form action="/setup" style="float:left ; margin-right:10px" target="main_view"><input type="submit" value="Settup"/></form>
     <input style="float:left" type="button" value="Quit" onclick="frontEndShutdown();"/>
     <form id="stop_server" action="/stop"><input type="hidden" value="Stop"/></form>
-    <iframe id="workspace"
-            name="workspace"
+    <iframe id="main_view"
+            name="main_view"
             src="/pages/cover"
             style="border:medium solid black; height:95vh; width:90%;"/>
   </body>

@@ -94,6 +94,7 @@ function import_ingest()
     waiting.removeAttribute ("hidden");
     connection.open("PUT", "/import/ingest", true);
     connection.send(JSON.stringify (ingest_content));
+    window.location.pathname = '/pages/cover'
 }
 
 function import_init()

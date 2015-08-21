@@ -5,12 +5,16 @@ from hj.fe import fapp
 
 import flask
 import hashlib
+import hj.db
 import hj.config
 import hj.fe
 import hj.fe.forms
 import hj.fe.input
 import json
 import os
+import pickle
+import shutil
+import tempfile
 
 _active = None
 _signature = None
@@ -52,6 +56,7 @@ def import_fetch()->bytes:
                 m.update (data.encode())
                 s = hashlib.sha1()
                 s.update (data.encode())
+                # FIXME: need real first points
                 content[n].append ({'data':data,
                                     'description':'',
                                     'dfn':os.path.basename (fn),
@@ -67,7 +72,16 @@ def import_fetch()->bytes:
 @fapp.route ('/import/ingest', methods=['PUT'])
 def import_ingest()->bytes:
     content = json.loads (flask.request.data.decode())
-    return flask.redirect (flask.url_for ('_root'))
+    for k in ['routes', 'tracks', 'waypts']:
+        for item in content[k]:
+            fd,fn = tempfile.mkstemp()
+            os.close (fd)
+            with open (fn, 'wb') as f: pickle.dump (item, f)
+            shutil.move (fn, os.path.join (hj.config.wdir, item['id']))
+            hj.db.insert (hj.db.EntryType[k[:-1]], item['id'])
+            pass
+        pass
+    return b''
 
 @fapp.route ('/import/scan', methods=['PUT'])
 def import_scan_device()->bytes:
