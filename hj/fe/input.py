@@ -4,6 +4,7 @@
 from hj.fe import fapp
 
 import flask
+import gpxpy
 import hashlib
 import hj.db
 import hj.config
@@ -52,16 +53,23 @@ def import_fetch()->bytes:
         for n in ['routes', 'tracks', 'waypts']:
             for fn in xfer_info[n]:
                 data = device.fetch (fn, xfer_info['move']).read()
+                gpx = gpxpy.parse (data)
+
+                if 0 < gpx.get_points_no():
+                    first = gpx.get_points_data()[0].point
+                elif 0 < len (gpx.waypoints): first = gpx.waypoints[0]
+                
                 m = hashlib.md5()
                 m.update (data.encode())
                 s = hashlib.sha1()
                 s.update (data.encode())
-                # FIXME: need real first points
                 content[n].append ({'data':data,
                                     'description':'',
                                     'dfn':os.path.basename (fn),
-                                    'first':{'lat':"34.152973",'lon':"-118.966017"},
-                                    'id':'%s_%s' % (m.hexdigest(), s.hexdigest()),
+                                    'first':{'lat':first.latitude,
+                                             'lon':first.longitude},
+                                    'id':'%s_%s' % (m.hexdigest(),
+                                                    s.hexdigest()),
                                     'label':''})
                 pass
             pass

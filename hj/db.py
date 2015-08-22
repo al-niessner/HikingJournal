@@ -8,6 +8,8 @@ import shelve
 
 class EntryType(enum.Enum):
     entry = 3
+    leg   = 5 # track, waypoint, pictures, etc
+    quad  = 4
     route = 0
     track = 1
     waypt = 2
