@@ -2,6 +2,14 @@
 
 import argparse
 import hj.device
+import os
+
+def _path (p:str)->str:
+    if not os.path.exists (p):
+        raise ValueError('The path "' + p + '" does not exist.')
+    if not os.path.isdir (p):
+        raise ValueError('The path "' + p + '" is not a directory.')
+    return p
 
 def ns2dict (args : argparse.Namespace) -> dict:
     result = vars (args).copy()
@@ -12,9 +20,15 @@ def ns2dict (args : argparse.Namespace) -> dict:
         pass
     return result
 
+def db (ap : argparse.ArgumentParser, call) -> argparse.ArgumentParser:
+    '''add the common db args to the arg parser'''
+    ap.add_argument ('-W', '--working-dir', required=True, type=_path,
+                     help='the journals working directory where all of the data is kept')
+    ap.set_defaults (call=call)
+    return ap
+
 def device_input (ap : argparse.ArgumentParser, call) -> argparse.ArgumentParser:
     '''add the common device block to the arg parser'''
-    ap.add_argument
     ap.add_argument ('-t', '--type', dest='t', required=True, type=name2dtype,
                      help='the device type which can be found using "device.py"')
     ap.add_argument ('-p', '--parameters', default=[], nargs='*', type=kvpair,

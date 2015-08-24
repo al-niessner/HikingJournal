@@ -20,3 +20,11 @@ def _open(): return shelve.open (os.path.join (hj.config.wdir, 'db'))
 def insert (et:EntryType, id:str):
     with _open() as db: db[id] = et
     return
+
+def stats()->{}:
+    result = {}
+    with _open() as db: ets = [v for v in db.values()]
+    result['total'] = len (ets)
+    for et in EntryType: result[et.name] = ets.count (et)
+    print (result)
+    return result
