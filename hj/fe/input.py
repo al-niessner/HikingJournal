@@ -81,13 +81,8 @@ def import_fetch()->bytes:
 def import_ingest()->bytes:
     content = json.loads (flask.request.data.decode())
     for k in ['routes', 'tracks', 'waypts']:
-        for item in content[k]:
-            fd,fn = tempfile.mkstemp()
-            os.close (fd)
-            with open (fn, 'wb') as f: pickle.dump (item, f)
-            shutil.move (fn, os.path.join (hj.config.wdir, item['id']))
-            hj.db.insert (hj.db.EntryType[k[:-1]], item['id'])
-            pass
+        for item in content[k]: hj.db.archive (hj.db.EntryType[k[:-1]],
+                                               item, item['id'])
         pass
     return b''
 

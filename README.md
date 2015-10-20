@@ -47,6 +47,13 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
     - [x] change labels
     - [x] add descriptions
   - [x] redirect back to cover of journal
+- [x] database
+  - [x] determine if it needs GIS database *no, but can hook one in later if need be just to do GIS relational junk*
+  - [x] define storage structure
+    - use Python shelve
+    - use the md5 checksum as the keyword
+    - value is the type of data contained in the md5 checksum
+    - data is stored in **wdir** from the config file
 - [ ] manage metadata
   - [ ] ideal workflow step 2
     - [ ] find Quad map(s) associated with a route, track, or waypoint
