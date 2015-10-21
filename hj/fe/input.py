@@ -13,9 +13,6 @@ import hj.fe.forms
 import hj.fe.input
 import json
 import os
-import pickle
-import shutil
-import tempfile
 
 _active = None
 _signature = None

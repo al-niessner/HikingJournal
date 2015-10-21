@@ -20,6 +20,7 @@ class Quad(hj.Map):
             self._at = hj.Map.Affine(Ox=grt[0], Px=grt[1], Lx=grt[2],
                                      Oy=grt[3], Py=grt[4], Ly=grt[5])
             self._cols = ds.RasterXSize
+            self._name = ' '.join (os.path.basename (fn).split ('_')[:-2])
             self._neatline = ds.GetMetadataItem ('NEATLINE')
             self._projection = ds.GetProjection()
             self._rows = ds.RasterYSize
@@ -51,8 +52,41 @@ class Quad(hj.Map):
                 r += 1 if r < self._rows else 0
                 self._pix.append (hj.Map.Pixel(col=c, row=r))
                 pass
+            Mx = self._at.Ox + self._at.Px*self._cols + self._at.Lx*self._rows
+            My = self._at.Oy + self._at.Py*self._cols + self._at.Ly*self._rows
+            p1 = osgeo.ogr.CreateGeometryFromWkt ('POINT (%d %d)' %
+                                                  (self._at.Ox, self._at.Oy))
+            p2 = osgeo.ogr.CreateGeometryFromWkt ('POINT (%d %d)' %
+                                                  (Mx, self._at.Oy))
+            p3 = osgeo.ogr.CreateGeometryFromWkt ('POINT (%d %d)' %
+                                                  (self._at.Ox, My))
+            p4 = osgeo.ogr.CreateGeometryFromWkt ('POINT (%d %d)' % (Mx, My))
+            p1.Transform (transform)
+            p2.Transform (transform)
+            p3.Transform (transform)
+            p4.Transform (transform)
+            self._wat = hj.Map.Affine(Ox=p1.GetX(),
+                                      Px=(p2.GetX() - p1.GetX()) / self._cols,
+                                      Lx=(p4.GetX() - p2.GetX()) / self._rows,
+                                      Oy=p1.GetY(),
+                                      Py=(p4.GetY() - p3.GetY()) / self._cols,
+                                      Ly=(p3.GetY() - p1.GetY()) / self._rows)
+            self._fingerprint = hj.db.archive (hj.db.EntryType.raw, fn)
             pass
         return
+
+    def get_image(self)->numpy.array:
+        ds = gdal.Open (os.path.join (hj.config.wdir, self._fingerprint))
+        rgb = ds.ReadAsArray()
+        img = numpy.empty (rgb.shape[1:] + (3,), dtype=numpy.uint8)
+        for i in range(3): img[:,:,i] = rgb[i]        
+        return img
+
+    def get_affine_transform(self)->Affine: return self._wat
+    def get_fingerprint(self)->str: return self._fingerprint
+    def get_name(self)->str: return self._name
+    def get_pixel_bb(self)->[Pixel]: return self._pix.copy()
+    def get_wgs84_bb(self)->[Point]: return self._wgs.copy()
     pass
 
 

@@ -2,9 +2,11 @@
 '''
 
 import enum
+import hashlib
 import hj.config
 import os
 import shelve
+import subprocess
 
 class EntryType(enum.Enum):
     entry = 3
@@ -16,17 +18,41 @@ class EntryType(enum.Enum):
     waypt = 2
     pass
 
+def _id (data:bytes, id:str=None)->str:
+    if id is None:
+        m = hashlib.md5()
+        m.update (data)
+        s = hashlib.sha1()
+        s.update (data)
+        id = '%s_%s' % (m.hexdigest(), s.hexdigest())
+        pass
+    return id
+
 def _open(): return shelve.open (os.path.join (hj.config.wdir, 'db'))
 
+def _rid (fn:str)->str:
+    m = subprocess.check_output ('md5sum', fn).decode().split()[0]
+    s = subprocess.check_output ('sha1sum', fn).decode().split()[0]
+    return '%s_%s' % (m, s)
+
 def archive (typ:EntryType, item, id:str=None):
-    fd,fn = tempfile.mkstemp()
-    os.close (fd)
-    with open (fn, 'wb') as f: pickle.dump (item, f)
-    shutil.move (fn, os.path.join (hj.config.wdir, item))
-    # FIXME: need to compute the md5_sha1 id here if not already given
-    assert (id is not None)
+    '''Archive data into the database for later reference
+
+    typ  : the type of data expected
+    item : the actual data
+    id   : optional ID of the data and when not given will be the md5_sha1
+           checksums of 
+    '''
+    if typ is EntryType.raw: shutil.copy (item, os.path.join (hj.config.wdir,
+                                                              _rid (item)))
+    else:
+        data = pickle.dumps (item, pickle.HIGHEST_PROTOCOL)
+        with open (os.path.join (hj.config.wdir,
+                                 _id (data, id)), 'wb') as f: f.write (data)
+        pass
+
     insert (typ, id)
-    return
+    return id
 
 def insert (et:EntryType, id:str):
     with _open() as db: db[id] = et
