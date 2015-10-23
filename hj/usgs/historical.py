@@ -1,13 +1,18 @@
 
 import gdal
 import hj
+import hj.db
+import hj.util.path
+import logging ; log = logging.getLogger (__name__)
 import numpy
 import os
 import osgeo.ogr
 import osgeo.osr
 
+class NotUSGSHistoricalError(Exception): pass
+
 class Quad(hj.Map):
-    def __init__(self, fn):
+    def __init__(self, fn:str, fp:str=None):
         '''Initialization of a USGS Quadrangle Topographical map
         
         Load the reference information from the USGS historical quad and move
@@ -17,6 +22,9 @@ class Quad(hj.Map):
         if os.path.exists (fn) and os.path.isfile (fn):
             ds = gdal.Open (fn)
             grt = ds.GetGeoTransform()
+
+            if grt == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0): raise NotUSGSHistoricalError(fn + ' is not a USGS Historical Topographical Map')
+
             self._at = hj.Map.Affine(Ox=grt[0], Px=grt[1], Lx=grt[2],
                                      Oy=grt[3], Py=grt[4], Ly=grt[5])
             self._cols = ds.RasterXSize
@@ -71,10 +79,27 @@ class Quad(hj.Map):
                                       Oy=p1.GetY(),
                                       Py=(p4.GetY() - p3.GetY()) / self._cols,
                                       Ly=(p3.GetY() - p1.GetY()) / self._rows)
-            self._fingerprint = hj.db.archive (hj.db.EntryType.raw, fn)
-            pass
+            self._fingerprint = hj.db.archive (hj.db.EntryType.raw, fn, fp)
+        else: raise NotUSGSHistoricalError(fn + ' is not a valid file')
         return
 
+    def __getstate__(self):
+        state = self.__dict__
+        state['_at'] = state['_at']._asdict()
+        state['_orig'] = [p._asdict() for p in state['_orig']]
+        state['_pix'] = [p._asdict() for p in state['_pix']]
+        state['_wat'] = state['_wat']._asdict()
+        state['_wgs'] = [p._asdict() for p in state['_wgs']]
+        return state
+
+    def __setstate__(self, state):
+        state['_at'] = hj.Map.Affine(**state['_at'])
+        state['_orig'] = [hj.Map.Point(**p) for p in state['_orig']]
+        state['_pix'] = [hj.Map.Pixel(**p) for p in state['_pix']]
+        state['_wat'] = hj.Map.Affine(**state['_wat'])
+        state['_wgs'] = [hj.Map.Point(**p) for p in state['_wgs']]
+        return self.__dict__.update (state)
+    
     def get_image(self)->numpy.array:
         ds = gdal.Open (os.path.join (hj.config.wdir, self._fingerprint))
         rgb = ds.ReadAsArray()
@@ -82,16 +107,23 @@ class Quad(hj.Map):
         for i in range(3): img[:,:,i] = rgb[i]        
         return img
 
-    def get_affine_transform(self)->Affine: return self._wat
+    def get_affine_transform(self)->hj.Map.Affine: return self._wat
     def get_fingerprint(self)->str: return self._fingerprint
     def get_name(self)->str: return self._name
-    def get_pixel_bb(self)->[Pixel]: return self._pix.copy()
-    def get_wgs84_bb(self)->[Point]: return self._wgs.copy()
+    def get_pixel_bb(self)->[hj.Map.Pixel]: return self._pix.copy()
+    def get_wgs84_bb(self)->[hj.Map.Point]: return self._wgs.copy()
     pass
 
+def scan (start:str, recurse:str)->None:
+    '''Scan a directory for USGS Quad maps'''
+    known = [m.get_fingerprint() for m in hj.db.filter (hj.db.EntryType.map)]
+    for wdir, fn in hj.util.path.homogenize (start, recurse):
+        ffn = os.path.join (wdir, fn)
+        fp = hj.db._rid (ffn)
 
-if __name__ == '__main__':
-    import hj.usgs.historical
-
-    quad = hj.usgs.historical.Quad('/home/niessner/Hiking/Quads/Rockies/MT_Silver Run Peak_266706_1996_24000_geo.pdf')
-    pass
+        if known.count (fp) == 0:
+            try: known.append (hj.db.archive (hj.db.EntryType.map,
+                                              Quad(ffn,fp)))
+            except NotUSGSHistoricalError: log.exception('Ignoring invlid file')
+        pass
+    return

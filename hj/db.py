@@ -1,11 +1,14 @@
 '''Interface to database so that others can open/close all of it
 '''
 
+import builtins
 import enum
 import hashlib
 import hj.config
 import os
+import pickle
 import shelve
+import shutil
 import subprocess
 
 class EntryType(enum.Enum):
@@ -30,10 +33,13 @@ def _id (data:bytes, id:str=None)->str:
 
 def _open(): return shelve.open (os.path.join (hj.config.wdir, 'db'))
 
-def _rid (fn:str)->str:
-    m = subprocess.check_output ('md5sum', fn).decode().split()[0]
-    s = subprocess.check_output ('sha1sum', fn).decode().split()[0]
-    return '%s_%s' % (m, s)
+def _rid (fn:str, id:str=None)->str:
+    if id is None:
+        m = subprocess.check_output (['md5sum', fn]).decode().split()[0]
+        s = subprocess.check_output (['sha1sum', fn]).decode().split()[0]
+        id = '%s_%s' % (m, s)
+        pass
+    return id
 
 def archive (typ:EntryType, item, id:str=None):
     '''Archive data into the database for later reference
@@ -43,18 +49,33 @@ def archive (typ:EntryType, item, id:str=None):
     id   : optional ID of the data and when not given will be the md5_sha1
            checksums of 
     '''
-    if typ is EntryType.raw: shutil.copy (item, os.path.join (hj.config.wdir,
-                                                              _rid (item)))
+    if typ is EntryType.raw:
+        id =  _rid (item, id)
+        shutil.copy (item, os.path.join (hj.config.wdir, id))
     else:
         data = pickle.dumps (item, pickle.HIGHEST_PROTOCOL)
-        with open (os.path.join (hj.config.wdir,
-                                 _id (data, id)), 'wb') as f: f.write (data)
+        id = _id (data, id)
+        with open (os.path.join (hj.config.wdir, id), 'wb') as f: f.write (data)
         pass
 
     insert (typ, id)
     return id
 
+def filter (et:EntryType)->[str]:
+    '''Extract a specific data type out of the database
+    '''
+    result = []
+    with _open() as db:
+        for fn,et in builtins.filter(lambda i:i[1] == et, db.items()):
+            with open (os.path.join (hj.config.wdir, fn), 'rb') as f:
+                result.append (pickle.load (f))
+                pass
+            pass
+        pass
+    return result
+
 def insert (et:EntryType, id:str):
+    '''Insert an entry into the database'''
     with _open() as db: db[id] = et
     return
 
