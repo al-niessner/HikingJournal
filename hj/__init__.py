@@ -2,6 +2,36 @@
 import collections
 import numpy
 
+class GPSElement(object):
+    Point = collections.namedtuple ('Point', ['elev', 'lat', 'lon', 'time'])
+
+    def get_desc (self)->str:
+        '''User provided amd mutaable text scribing this GPS Element'''
+        raise NotImplementedError()
+    
+    def get_fingerprint (self)->str:
+        '''An identifier that is immutable but unique
+
+        The identifier should only be based on [Point] contain within this
+        element. It shoud not change when the description or label change as
+        these items are user mutable over the life of any instance of this
+        element.
+        '''
+        raise NotImplementedError()
+
+    def get_label (self)->str:
+        '''User provided and mutable short text description'''
+        raise NotImplementedError()
+    
+    def get_name (self)->str:
+        '''The original file name that provided this GPS data'''
+        raise NotImplementedError()
+    
+    def get_points (self)->[Point]:
+        '''The list of GPS data'''
+        raise NotImplementedError()
+    pass
+
 class Map(object):
     # the affine transform given pixel p and line l in a raster is:
     #   X(p,l) = Ox + Px * p + Lx * l
