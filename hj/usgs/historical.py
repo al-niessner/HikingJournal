@@ -23,7 +23,9 @@ class Quad(hj.Map):
             ds = gdal.Open (fn)
             grt = ds.GetGeoTransform()
 
-            if grt == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0): raise NotUSGSHistoricalError(fn + ' is not a USGS Historical Topographical Map')
+            if grt == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0):
+                raise NotUSGSHistoricalError(fn + ' is not a USGS Historical '+
+                                             'Topographical Map')
 
             self._at = hj.Map.Affine(Ox=grt[0], Px=grt[1], Lx=grt[2],
                                      Oy=grt[3], Py=grt[4], Ly=grt[5])

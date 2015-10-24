@@ -14,7 +14,8 @@ def db (args:argparse.Namespace):
 Database Statistics:
   Entries:   %(entry)d
   Legs:      %(leg)d
-  Quads:     %(quad)d
+  Maps:      %(map)d
+  Raw:       %(raw)d
   Routes:    %(route)d
   Tracks:    %(track)d
   Waypoints: %(waypt)d
