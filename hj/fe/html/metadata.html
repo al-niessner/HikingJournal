@@ -7,9 +7,37 @@
   </head> 
   <body onload="">
     <dev id="workbench">
-      <div id="tracks"></div>
-      <div id="waypts"></div>
-      <div id="photos"></div>
+      <div id="tracks">
+        <form>
+          <label for="track_list">Tracks:</label><br/>
+          <select id="track_list" name="track_list">
+            <option disabled>unlegged</option>
+            <option>a</option>
+            <option>b</option>
+            <option disabled>legged</option>
+            <option>e</option>
+            <option>f</option>
+          </select>
+        </form>
+      </div>
+      <div id="waypts">
+        <form>
+          <label for="waypt_list">Waypoints:</label><br/>
+          <select id="waypt_list" multiple="multiple" name="waypt_list">
+            <option>c</option>
+            <option>d</option>
+          </select>
+        </form>
+      </div>
+      <div id="photos">
+        <form>
+          <label for="photo_list">Photos:</label><br/>
+          <select id="photo_list" multiple="multiple" name="photo_list">
+            <option>g</option>
+            <option>h</option>
+          </select>
+        </form>
+      </div>
       <div id="map"></div>
       <div id="status"></div>
       <div id="update">
