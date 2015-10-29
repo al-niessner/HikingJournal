@@ -1,44 +1,11 @@
 
-var ingest_content;
-var ingest_index = 0;
+function import_complete() { window.location.pathname = '/pages/cover'; }
 
-function import_advance (direction)
+function import_done()
 {
-    var back = document.getElementById ("back");
-    var data;
-    var next = document.getElementById ("next");
-    var title = "Route";
-    var workspace = document.getElementById ("workspace");
-    ingest_index += direction
-
-    if (ingest_index === 0) {back.setAttribute ("disabled","");}
-    else {back.removeAttribute ("disabled");}
-
-    if (ingest_index === ingest_content.routes.length + ingest_content.tracks.length + ingest_content.waypts.length - 1)
-    {next.setAttribute ("disabled","");}
-    else {next.removeAttribute ("disabled");}
-
-    if (ingest_content.routes.length + ingest_content.tracks.length - 1 < ingest_index)
-    {
-        data = ingest_content.waypts[ingest_index - ingest_content.routes.length - ingest_content.tracks.length];
-        title = "Waypoint";
-    }
-    else
-    {
-        if (ingest_content.routes.length - 1 < ingest_index)
-        {
-            data = ingest_content.tracks[ingest_index - ingest_content.routes.length];
-            title = "Track:";
-        }
-        else { data = ingest_content.routes[ingest_index]; }
-    }
-
-    var block = '<p style="margin:0;"><b>' + title + "</b></p>";
-    block += '<p style="color:DarkGray;margin:0;text-indent:25px;"><small>device file name: ' + data.dfn + '</small></p>';
-    block += '<p style="margin:0;text-indent:25px;"><a href="http://maps.google.com/maps?zoom=12&t=m&q=loc:' + data.first.lat + '+' + data.first.lon + '" target="_blank">First GPS Location</a></p>'
-    block += '<br/><label>Label:</label><input id="label_input" style="margin-right:10%; margin-left:1%;" size="80%" type="text" value="' + data.label + '"><br>'
-    block += '<label>Description:</label><textarea id="descr_input" style="margin-right:10%; margin-left:5%;" rows="10" cols="80%">' + data.description + '</textarea>'
-    workspace.innerHTML = block;
+    document.getElementById ("allow").setAttribute ("hidden","");
+    document.getElementById ("update").setAttribute ("hidden","");
+    document.getElementById ("waiting").removeAttribute ("hidden");
 }
 
 function import_fetch (clear)
@@ -67,9 +34,7 @@ function import_fetch (clear)
     {
         if (connection.readyState == 4 && connection.status == 200)
         {
-            ingest_content = JSON.parse (connection.responseText);
-            ingest_index = 0;
-            import_advance (0);
+            gpsi_init (JSON.parse (connection.responseText));
             waiting.setAttribute ("hidden","");
             allow.removeAttribute ("hidden");
             update.removeAttribute ("hidden");
@@ -82,43 +47,9 @@ function import_fetch (clear)
     connection.send(JSON.stringify (data));
 }
 
-function import_ingest()
-{
-    var allow = document.getElementById ("allow");
-    var connection = new XMLHttpRequest();
-    var update = document.getElementById ("update");
-    var waiting = document.getElementById ("waiting");
-
-    allow.setAttribute ("hidden","");
-    update.setAttribute ("hidden","");
-    waiting.removeAttribute ("hidden");
-    connection.open("PUT", "/import/ingest", true);
-    connection.send(JSON.stringify (ingest_content));
-    window.location.pathname = '/pages/cover'
-}
-
 function import_init()
 {
     input_dev_init();
-}
-
-function import_record()
-{
-    var data
-    var description = document.getElementById ("descr_input");
-    var label = document.getElementById ("label_input");
-    
-    if (ingest_content.routes.length + ingest_content.tracks.length - 1 < ingest_index)
-    {data = ingest_content.waypts[ingest_index - ingest_content.routes.length - ingest_content.tracks.length];}
-    else
-    {
-        if (ingest_content.routes.length - 1 < ingest_index)
-        {data = ingest_content.tracks[ingest_index - ingest_content.routes.length];}
-        else {data = ingest_content.routes[ingest_index];}
-    }
-
-    data.label = label.value;
-    data.description = description.value;
 }
 
 function import_wipe()

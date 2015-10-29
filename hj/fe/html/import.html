@@ -1,6 +1,7 @@
 <!DOCTYPE html> 
 <html>
   <head>
+    <script src="/scripts/gpsi.js"></script>
     <script src="/scripts/input_dev.js"></script>
     <script src="/scripts/import.js"></script>
     <title>Input Tracks and Waypoints</title>
@@ -43,9 +44,9 @@
           <div id="workspace">
           </div>
           <br/>
-          <button id="back" onclick="import_record(); import_advance (-1);" type="button">Previous</button>
-          <button id="next" onclick="import_record(); import_advance (1);" type="button">Successor</button>
-          <button onclick="import_record(); import_ingest();" style="margin-left:75px;" type="button">Done</button>
+          <button id="back" onclick="gpsi_record(); gpsi_advance (-1);" type="button">Previous</button>
+          <button id="next" onclick="gpsi_record(); gpsi_advance (1);" type="button">Successor</button>
+          <button onclick="import_done(); gpsi_record(); gpsi_ingest(); import_complete();" style="margin-left:75px;" type="button">Done</button>
         </fieldset>
       </form>
     </div>

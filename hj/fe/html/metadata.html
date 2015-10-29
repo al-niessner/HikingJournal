@@ -1,19 +1,31 @@
 <!DOCTYPE html> 
 <html>
   <head>
+    <script src="/scripts/gpsi.js"></script>
     <script src="/scripts/metadata.js"></script>
     <title>Attach Maps and Photos to Tracks and Waypoints</title>
   </head> 
   <body onload="">
-    <div id="tracks">
+    <dev id="workbench">
+      <div id="tracks"></div>
+      <div id="waypts"></div>
+      <div id="photos"></div>
+      <div id="map"></div>
+      <div id="status"></div>
+      <div id="update">
+        <form>
+          <fieldset>
+            <legend>Update GPS Info</legend>
+            <div id="workspace">
+            </div>
+            <br/>
+            <button id="back" onclick="gpsi_record(); gpsi_advance (-1);" type="button">Previous</button>
+            <button id="next" onclick="gpsi_record(); gpsi_advance (1);" type="button">Successor</button>
+            <button onclick="gpsi_record(); gpsi_ingest();" style="margin-left:75px;" type="button">Done</button>
+          </fieldset>
+        </form>
+      </div>
     </div>
-    <div id="waypts">
-    </div>
-    <div id="photos">
-    </div>
-    <div id="map">
-    </div>
-    <div id="status">
-    </div>
+    <div hidden id="waiting"><h1>Busy Working...</h1></div>
   </body>
 </html> 
