@@ -12,7 +12,6 @@ import hj.fe.forms
 import hj.fe.input
 import hj.util.gpx
 import json
-import os
 
 _active = None
 _signature = None
@@ -50,15 +49,15 @@ def import_fetch()->bytes:
         for n in ['routes', 'tracks', 'waypts']:
             for fn in xfer_info[n]:
                 for e in  hj.util.gpx.parse \
-                    (device.fetch (fn, xfer_info['move']).read()):
+                    (device.fetch (fn, xfer_info['move']).read(), fn):
                     hj.db.archive (e.get_type(), e, e.get_fingerprint())
                     cn = e.get_type().name + 's'
                     content[n].append ({'description':e.get_desc(),
                                         'dfn':e.get_name(),
                                         'first':{'lat':e.get_points()[0].lat,
-                                                 'lon':e.get_points()[1].lon},
+                                                 'lon':e.get_points()[0].lon},
                                         'id':e.get_fingerprint(),
-                                        'label':e.get_name()})
+                                        'label':e.get_label()})
                     pass
                 pass
             pass
@@ -71,7 +70,7 @@ def import_ingest()->bytes:
     content = json.loads (flask.request.data.decode())
     for k in ['routes', 'tracks', 'waypts']:
         for item in content[k]:
-            real_item = hj.db.fetch (item['id'])
+            real_item = hj.db.fetch ([item['id']])[item['id']]
             real_item.update (item)
             hj.db.update (real_item.get_fingerprint(), real_item)
             pass

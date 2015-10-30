@@ -86,7 +86,7 @@ class Quad(hj.Map):
         return
 
     def __getstate__(self):
-        state = self.__dict__
+        state = self.__dict__.copy()
         state['_at'] = state['_at']._asdict()
         state['_orig'] = [p._asdict() for p in state['_orig']]
         state['_pix'] = [p._asdict() for p in state['_pix']]

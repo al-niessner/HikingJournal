@@ -116,8 +116,8 @@ class GPSElement(object):
         '''Set, potentially updating, the label of this element'''
         raise NotImplementedError()
 
-    def update (d:{})->None:
-        if 'description' in d: self.set_description (d['description'])
+    def update (self, d:{})->None:
+        if 'description' in d: self.set_desc (d['description'])
         if 'label' in d: self.set_label (d['label'])
         return
     pass
