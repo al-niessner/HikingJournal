@@ -1,5 +1,5 @@
 
-function import_complete() { window.location.pathname = '/pages/cover'; }
+function import_complete() { window.location.pathname = '/pages/metadata'; }
 
 function import_done()
 {

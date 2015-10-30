@@ -12,9 +12,10 @@ import shutil
 import subprocess
 
 class EntryType(enum.Enum):
+    annot = 5 # annotated track with other gps elements, maps, photos etc
     entry = 3
-    leg   = 5 # track, waypoint, pictures, etc
     map   = 4 # hj.Map instance
+    photo = 7
     raw   = 6 # raw files that other elements reference
     route = 0
     track = 1
@@ -61,7 +62,19 @@ def archive (typ:EntryType, item, id:str=None):
     insert (typ, id)
     return id
 
-def filter (et:EntryType)->[str]:
+def fetch (ids:[str])->{str:object}:
+    '''Fetch particular items from the db and return it in a dictionary using same fps as the keys'''
+    result = {}
+    with _open() as db:
+        for fn in ids:
+            with open (os.path.join (hj.config.wdir, fn), 'rb') as f:
+                result[fn] = pickle.load (f)
+                pass
+            pass
+        pass
+    return result
+
+def filter (et:EntryType)->[]:
     '''Extract a specific data type out of the database
     '''
     result = []
@@ -86,3 +99,9 @@ def stats()->{}:
     for et in EntryType: result[et.name] = ets.count (et)
     print (result)
     return result
+
+def update (id:str, item)->None:
+    with open (os.path.join (hj.config.wdir, id), 'wb') as f:
+        pickle.dump (item, f, pickle.HIGHEST_PROTOCOL)
+        pass
+    return

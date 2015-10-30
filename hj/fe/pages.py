@@ -14,3 +14,6 @@ def metadata() -> bytes: return _static ('/html/metadata.html')
 
 @fapp.route ('/favicon.ico')
 def favicon() -> bytes: return _static ('/resources/favicon.ico')
+
+@fapp.route ('/photos/xmas.jpg')
+def xmas()->bytes: return _static ('/resources/xmas.jpg')

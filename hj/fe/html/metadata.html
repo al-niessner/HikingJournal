@@ -3,18 +3,31 @@
   <head>
     <script src="/scripts/gpsi.js"></script>
     <script src="/scripts/metadata.js"></script>
+    <style>
+      #tracks { border:0px; margin:2%; padding:0%; width:24%; }
+      #waypts { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
+      #photos { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
+      #map { border:0px; float:right; height:80%; margin:2%; padding:0%; width:68% }
+      #status {}
+      #update { border:10px; clear:both; margin:1%; padding:0%; width:100%; }
+      img { height:auto; width:100%; }
+    </style>
     <title>Attach Maps and Photos to Tracks and Waypoints</title>
   </head> 
   <body onload="">
     <dev id="workbench">
+      <div id="map">
+        <!-- see http://www.w3schools.com/html/html_images.asp and use <map> -->
+        <img src="/photos/xmas.jpg"/>
+      </div>
       <div id="tracks">
         <form>
           <label for="track_list">Tracks:</label><br/>
           <select id="track_list" name="track_list">
-            <option disabled>unlegged</option>
+            <option disabled>barren</option>
             <option>a</option>
             <option>b</option>
-            <option disabled>legged</option>
+            <option disabled>annotated</option>
             <option>e</option>
             <option>f</option>
           </select>
@@ -38,7 +51,6 @@
           </select>
         </form>
       </div>
-      <div id="map"></div>
       <div id="status"></div>
       <div id="update">
         <form>

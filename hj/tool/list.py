@@ -12,13 +12,13 @@ def db (args:argparse.Namespace):
     hj.config.wdir = args.working_dir
     print ('''
 Database Statistics:
-  Entries:   %(entry)d
-  Legs:      %(leg)d
-  Maps:      %(map)d
-  Raw:       %(raw)d
-  Routes:    %(route)d
-  Tracks:    %(track)d
-  Waypoints: %(waypt)d
+  Annotations %(annot)d
+  Entries:    %(entry)d
+  Maps:       %(map)d
+  Raw:        %(raw)d
+  Routes:     %(route)d
+  Tracks:     %(track)d
+  Waypoints:  %(waypt)d
 
   Total:     %(total)d
     ''' % hj.db.stats())

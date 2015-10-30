@@ -4,13 +4,13 @@
 from hj.fe import fapp
 
 import flask
-import gpxpy
 import hashlib
 import hj.db
 import hj.config
 import hj.fe
 import hj.fe.forms
 import hj.fe.input
+import hj.util.gpx
 import json
 import os
 
@@ -49,25 +49,17 @@ def import_fetch()->bytes:
     with _current (dt, **extras) as device:
         for n in ['routes', 'tracks', 'waypts']:
             for fn in xfer_info[n]:
-                data = device.fetch (fn, xfer_info['move']).read()
-                gpx = gpxpy.parse (data)
-
-                if 0 < gpx.get_points_no():
-                    first = gpx.get_points_data()[0].point
-                elif 0 < len (gpx.waypoints): first = gpx.waypoints[0]
-                
-                m = hashlib.md5()
-                m.update (data.encode())
-                s = hashlib.sha1()
-                s.update (data.encode())
-                content[n].append ({'data':data,
-                                    'description':'',
-                                    'dfn':os.path.basename (fn),
-                                    'first':{'lat':first.latitude,
-                                             'lon':first.longitude},
-                                    'id':'%s_%s' % (m.hexdigest(),
-                                                    s.hexdigest()),
-                                    'label':''})
+                for e in  hj.util.gpx.parse \
+                    (device.fetch (fn, xfer_info['move']).read()):
+                    hj.db.archive (e.get_type(), e, e.get_fingerprint())
+                    cn = e.get_type().name + 's'
+                    content[n].append ({'description':e.get_desc(),
+                                        'dfn':e.get_name(),
+                                        'first':{'lat':e.get_points()[0].lat,
+                                                 'lon':e.get_points()[1].lon},
+                                        'id':e.get_fingerprint(),
+                                        'label':e.get_name()})
+                    pass
                 pass
             pass
         device.update()
@@ -78,8 +70,11 @@ def import_fetch()->bytes:
 def import_ingest()->bytes:
     content = json.loads (flask.request.data.decode())
     for k in ['routes', 'tracks', 'waypts']:
-        for item in content[k]: hj.db.archive (hj.db.EntryType[k[:-1]],
-                                               item, item['id'])
+        for item in content[k]:
+            real_item = hj.db.fetch (item['id'])
+            real_item.update (item)
+            hj.db.update (real_item.get_fingerprint(), real_item)
+            pass
         pass
     return b''
 
