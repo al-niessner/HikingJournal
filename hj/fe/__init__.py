@@ -34,6 +34,7 @@ def run (port : int) -> None:
     import hj.fe.forms
     import hj.fe.js
     import hj.fe.input
+    import hj.fe.metadata
     import hj.fe.pages
     
     d = cherrypy.wsgiserver.WSGIPathInfoDispatcher({'/': fapp})
