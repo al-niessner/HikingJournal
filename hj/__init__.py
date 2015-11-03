@@ -72,8 +72,10 @@ class GPSElement(object):
     def as_dict (self)->{}:
         return {'description':self.get_desc(),
                 'fingerprint':self.get_fingerprint(),
+                'first':{'lat':self.get_points()[0].lat,
+                         'lon':self.get_points()[0].lon},
                 'label':self.get_label(),
-                'name':self.get_label()}
+                'name':self.get_name()}
     
     def get_desc (self)->str:
         '''User provided amd mutaable text scribing this GPS Element'''

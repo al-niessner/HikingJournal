@@ -52,12 +52,7 @@ def import_fetch()->bytes:
                     (device.fetch (fn, xfer_info['move']).read(), fn):
                     hj.db.archive (e.get_type(), e, e.get_fingerprint())
                     cn = e.get_type().name + 's'
-                    content[n].append ({'description':e.get_desc(),
-                                        'dfn':e.get_name(),
-                                        'first':{'lat':e.get_points()[0].lat,
-                                                 'lon':e.get_points()[0].lon},
-                                        'id':e.get_fingerprint(),
-                                        'label':e.get_label()})
+                    content[n].append (e.as_dict())
                     pass
                 pass
             pass
@@ -70,7 +65,8 @@ def import_ingest()->bytes:
     content = json.loads (flask.request.data.decode())
     for k in ['routes', 'tracks', 'waypts']:
         for item in content[k]:
-            real_item = hj.db.fetch ([item['id']])[item['id']]
+            id = item['fingerprint']
+            real_item = hj.db.fetch ([id])[id]
             real_item.update (item)
             hj.db.update (real_item.get_fingerprint(), real_item)
             pass

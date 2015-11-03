@@ -57,7 +57,6 @@ function metadata_load (lname, nname)
 
             sel.innerHTML = opts;
             metadata_free();
-            console.log (nname);
         }
     }
     connection.open("GET", nname, true);
