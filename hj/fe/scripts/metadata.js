@@ -1,6 +1,10 @@
 
 var metadata_count = 0;
 var metadata_expected = 0;
+var metadata_tl = [];
+var metadata_tv = [];
+var metadata_wl = [];
+var metadata_wv = [];
 
 function metadata_busy (expected)
 {
@@ -16,6 +20,19 @@ function metadata_free()
 
     if (metadata_expected <= metadata_count)
     {
+        if (metadata_tv.length === 1)
+        { }
+        else
+        {
+            var all = {'routes':[], 'tracks':[], 'waypts':[]};
+
+            for (i = 0 ; i < metadata_tl.length ; i++)
+            { all.tracks.push (metadata_tl[i]); }
+            for (i = 0 ; i < metadata_wl.length ; i++)
+            { all.waypts.push (metadata_wl[i]); }
+            gpsi_init (all);
+        }
+
         document.getElementById ("waiting").setAttribute ("hidden","");
         document.getElementById ("workbench").removeAttribute ("hidden");
     }
@@ -42,17 +59,26 @@ function metadata_load (lname, nname)
 
             if (lname === "track_list")
             {
-                opts += '<option disabled>forsaken</option>'
+                opts += '<option></option><option disabled>forsaken</option>'
                 for (i = 0 ; i < data.barren.length ; i++)
-                { opts += '<option value="' + data.barren[i].fingerprint + '">' + data.barren[i].label + '</option>'; }
+                {
+                    metadata_tl.push (data.barren[i]);
+                    opts += '<option value="' + data.barren[i].fingerprint + '">' + data.barren[i].label + '</option>';
+                }
                 opts += '<option disabled>annotated</option>'
                 for (i = 0 ; i < data.annotated.length ; i++)
-                { opts += '<option value="' + data.annotated[i].fingerprint + '">' + data.annotated[i].label + '</option>'; }
+                {
+                    metadata_tl.push (data.annotated[i]);
+                    opts += '<option value="' + data.annotated[i].fingerprint + '">' + data.annotated[i].label + '</option>';
+                }
             }
             else
             {
                 for (i = 0 ; i < data.length ; i++)
-                { opts += '<option value="' + data[i].fingerprint + '">' + data[i].label + '</option>'; }
+                {
+                    if (lname === "waypt_list") { metadata_wl.push (data[i]); }
+                    opts += '<option value="' + data[i].fingerprint + '">' + data[i].label + '</option>';
+                }
             }
 
             sel.innerHTML = opts;
@@ -61,4 +87,25 @@ function metadata_load (lname, nname)
     }
     connection.open("GET", nname, true);
     connection.send();
+}
+
+function metadata_selt()
+{
+    console.log ("selected a track...");
+    var selp = document.getElementById ("photo_list");
+    var selt = document.getElementById ("track_list");
+    var selw = document.getElementById ("waypt_list");
+
+    if (selt.value === "")
+    {
+        console.log ('   clear content...');
+    }
+    else
+    {
+        console.log (selt.value);
+        for (w = 0 ; w < selw.selectedOptions.length ; w++)
+        {
+            console.log (selw.selectedOptions[w].value);
+        }
+    }
 }
