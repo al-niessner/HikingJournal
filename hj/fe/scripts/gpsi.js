@@ -58,7 +58,7 @@ function gpsi_init (item_list)
 
 function gpsi_record()
 {
-    var data
+    var data;
     var description = document.getElementById ("descr_input");
     var label = document.getElementById ("label_input");
     

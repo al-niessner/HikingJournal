@@ -59,17 +59,17 @@ function metadata_load (lname, nname)
 
             if (lname === "track_list")
             {
-                opts += '<option></option><option disabled>forsaken</option>'
+                opts += '<option value="reset">-- RESET --</option><option disabled>forsaken</option>'
                 for (i = 0 ; i < data.barren.length ; i++)
                 {
                     metadata_tl.push (data.barren[i]);
-                    opts += '<option value="' + data.barren[i].fingerprint + '">' + data.barren[i].label + '</option>';
+                    opts += '<option id="' + data.barren[i].fingerprint + '" value="' + data.barren[i].fingerprint + '">' + data.barren[i].label + '</option>';
                 }
                 opts += '<option disabled>annotated</option>'
                 for (i = 0 ; i < data.annotated.length ; i++)
                 {
                     metadata_tl.push (data.annotated[i]);
-                    opts += '<option value="' + data.annotated[i].fingerprint + '">' + data.annotated[i].label + '</option>';
+                    opts += '<option id="' + data.annotated[i].fingerprint+ '" value="' + data.annotated[i].fingerprint + '">' + data.annotated[i].label + '</option>';
                 }
             }
             else
@@ -77,7 +77,7 @@ function metadata_load (lname, nname)
                 for (i = 0 ; i < data.length ; i++)
                 {
                     if (lname === "waypt_list") { metadata_wl.push (data[i]); }
-                    opts += '<option value="' + data[i].fingerprint + '">' + data[i].label + '</option>';
+                    opts += '<option id="' + data[i].fingerprint + '" value="' + data[i].fingerprint + '">' + data[i].label + '</option>';
                 }
             }
 
@@ -96,16 +96,35 @@ function metadata_selt()
     var selt = document.getElementById ("track_list");
     var selw = document.getElementById ("waypt_list");
 
-    if (selt.value === "")
+    if (selt.value === "reset")
     {
         console.log ('   clear content...');
     }
     else
     {
-        console.log (selt.value);
+        console.log ('   t: ' + selt.value);
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {
-            console.log (selw.selectedOptions[w].value);
+            console.log ('   w: '  + selw.selectedOptions[w].value);
         }
     }
+}
+
+function metadata_update()
+{
+    var data, opt;
+    
+    if (gpsi_content.routes.length + gpsi_content.tracks.length - 1 < gpsi_index)
+    { data = gpsi_content.waypts[gpsi_index - gpsi_content.routes.length - gpsi_content.tracks.length]; }
+    else
+    {
+        if (gpsi_content.routes.length - 1 < gpsi_index)
+        { data = gpsi_content.tracks[gpsi_index - gpsi_content.routes.length]; }
+        else { data = gpsi_content.routes[gpsi_index]; }
+    }
+
+    opt = document.getElementById (data.fingerprint);
+
+    if (opt) { opt.innerHTML = data.label; }
+    else { console.log ('metadata_update(): opt is null'); }
 }

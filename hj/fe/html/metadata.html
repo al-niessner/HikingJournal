@@ -58,8 +58,8 @@
             <div id="workspace">
             </div>
             <br/>
-            <button id="back" onclick="gpsi_record(); gpsi_advance (-1);" type="button">Previous</button>
-            <button id="next" onclick="gpsi_record(); gpsi_advance (1);" type="button">Successor</button>
+            <button id="back" onclick="gpsi_record(); metadata_update(); gpsi_advance (-1);" type="button">Previous</button>
+            <button id="next" onclick="gpsi_record(); metadata_update(); gpsi_advance (1);" type="button">Successor</button>
             <button onclick="gpsi_record(); gpsi_ingest();" style="margin-left:75px;" type="button">Done</button>
           </fieldset>
         </form>
