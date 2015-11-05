@@ -1,10 +1,9 @@
 
 var metadata_count = 0;
 var metadata_expected = 0;
+var metadata_is_initializing = false;
 var metadata_tl = [];
-var metadata_tv = [];
 var metadata_wl = [];
-var metadata_wv = [];
 
 function metadata_busy (expected)
 {
@@ -20,9 +19,7 @@ function metadata_free()
 
     if (metadata_expected <= metadata_count)
     {
-        if (metadata_tv.length === 1)
-        { }
-        else
+        if (metadata_is_initializing)
         {
             var all = {'routes':[], 'tracks':[], 'waypts':[]};
 
@@ -31,6 +28,8 @@ function metadata_free()
             for (i = 0 ; i < metadata_wl.length ; i++)
             { all.waypts.push (metadata_wl[i]); }
             gpsi_init (all);
+            metadata_is_initializing = false;
+            document.getElementById ("waypt_list").setAttribute ("disabled","");
         }
 
         document.getElementById ("waiting").setAttribute ("hidden","");
@@ -40,6 +39,7 @@ function metadata_free()
 
 function metadata_init()
 {
+    metadata_is_initializing = true;
     metadata_busy (3);
     metadata_load ("photo_list", "/metadata/photos");
     metadata_load ("track_list", "/metadata/tracks");
@@ -50,6 +50,7 @@ function metadata_load (lname, nname)
 {
     var connection = new XMLHttpRequest();
     var sel = document.getElementById (lname);
+
     connection.onreadystatechange = function()
     {
         if (connection.readyState == 4 && connection.status == 200)
@@ -99,14 +100,33 @@ function metadata_selt()
     if (selt.value === "reset")
     {
         console.log ('   clear content...');
+        document.getElementById ("map").innerHTML = "";
+        console.log (selw);
+        selw.setAttribute ("disabled","");
+        for (w = 0 ; w < selw.selectedOptions.length ; w++)
+        {selw.selectedOptions[w].selected = false;}
     }
     else
     {
-        console.log ('   t: ' + selt.value);
-        for (w = 0 ; w < selw.selectedOptions.length ; w++)
+        var connection = new XMLHttpRequest();
+        connection.onreadystatechange = function()
         {
-            console.log ('   w: '  + selw.selectedOptions[w].value);
+            if (connection.readyState == 4 && connection.status == 200)
+            {
+                var data = JSON.parse (connection.responseText);
+
+                for (w = 0 ; w < data.wids ; w++)
+                {document.getElementById (data.wids[w]).selected = true;}
+                metadata_free();
+            }
         }
+
+        selw.removeAttribute ("disabled");
+        for (w = 0 ; w < selw.selectedOptions.length ; w++)
+        {selw.selectedOptions[w].selected = false;}
+        metadata_busy(1);
+        connection.open("GET", "/metadata/collate?tid=" + selt.value, true);
+        connection.send();
     }
 }
 

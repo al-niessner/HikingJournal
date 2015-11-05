@@ -6,6 +6,11 @@ from hj.fe import fapp
 import hj.db
 import json
 
+@fapp.route ('/metadata/collate', methods=['GET'])
+def collate (tid:str)->bytes:
+    content = {'map':'', 'wids':[]}
+    return json.dumps (content).encode()
+
 @fapp.route ('/metadata/photos', methods=['GET'])
 def photos()->bytes:
     content = [w.as_dict() for w in hj.db.filter (hj.db.EntryType.photo)]
