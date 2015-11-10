@@ -102,6 +102,8 @@ class Quad(hj.Map):
         state['_wgs'] = [hj.Map.Point(**p) for p in state['_wgs']]
         return self.__dict__.update (state)
     
+    def _affine_transform(self)->hj.Map.Affine: return self._wat
+    
     def get_image(self)->numpy.array:
         ds = gdal.Open (os.path.join (hj.config.wdir, self._fingerprint))
         rgb = ds.ReadAsArray()
@@ -109,7 +111,6 @@ class Quad(hj.Map):
         for i in range(3): img[:,:,i] = rgb[i]        
         return img
 
-    def get_affine_transform(self)->hj.Map.Affine: return self._wat
     def get_fingerprint(self)->str: return self._fingerprint
     def get_name(self)->str: return self._name
     def get_pixel_bb(self)->[hj.Map.Pixel]: return self._pix.copy()

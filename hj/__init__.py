@@ -134,12 +134,44 @@ class Map(object):
     # these two named tuples are used for the bounding box
     Pixel = collections.namedtuple ('Pixel', ['col', 'row'])
     Point = collections.namedtuple ('Point', ['lat', 'lon'])
-    
-    def get_affine_transform(self)->Affine:
+
+    def _affine_transform(self)->Affine:
         '''Return the affine transform for PIXEL to WGS84
         '''
         raise NotImplementedError()
 
+    def _contains (self, pts:[Point]):
+        import hj.util.geo
+        import matplotlib.path
+        import numpy
+        
+        bb = matplotlib.path.Path([(p.lon, p.lat) for p in self.get_wgs84_bb()],
+                                  [matplotlib.path.Path.MOVETO] +
+                                  [matplotlib.path.Path.LINETO
+                                   for i in range(len(self.get_wgs84_bb())-2)] +
+                                  [matplotlib.path.Path.CLOSEPOLY])
+        p = hj.util.geo.as_numpy_array (pts)
+        path = numpy.empty ((p.shape[0],2))
+        path[:,0] = p[:,hj.util.geo.LON]
+        path[:,1] = p[:,hj.util.geo.LAT]
+        return bb.contains_points (path)
+    
+    def all (self, pts:[Point])->bool:
+        '''Determine of any of the given points are contained in the map
+
+        Returns a single boolean. True if ALL of the points are contained
+        within this map. False otherwise.
+        '''
+        return self._contains (pts).all()
+
+    def any (self, pts:[Point])->bool:
+        '''Determine of any of the given points are contained in the map
+
+        Returns a single boolean. True if ANY of the points are contained
+        within this map. False otherwise.
+        '''
+        return self._contains (pts).any()
+    
     def get_fingerprint(self)->str:
         '''Return the fingerprint of the map
         '''
@@ -164,6 +196,29 @@ class Map(object):
         '''Return the bounding box in WGS84 coordinates
         '''
         raise NotImplementedError()
+
+    def overlay (self, data:[Point], icon:numpy.array=None)->[PIXEL]:
+        '''Overlay data onto the map (temporary)
+
+        The overlay is temporary and is not recorded in the database!
+        All overlays are accumulated and can be viewed by calling get_image().
+        
+        data : the GPS data to lay onto the map
+        icon : when None, the data is connected via linear interpolation
+               otherwise the icon array is centered at the given locations
+               
+        Returns a list of the pixel locations of those centers or an empty list
+                when icon is None.
+        '''
+        raise NotImplementedError()
+    
+    def which (pts:[Point])->[int]:
+        '''Determine which of the points are contained within the map
+
+        Returns the index of those points that are contained within this map
+        '''
+        import matplotlib.mlab
+        return matplotlib.mlab.find (self._contains (pts))
     pass
 
 class Photos(object):

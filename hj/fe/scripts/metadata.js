@@ -115,16 +115,17 @@ function metadata_selt()
             {
                 var data = JSON.parse (connection.responseText);
 
-                for (w = 0 ; w < data.wids ; w++)
+                console.log (data.wids)
+                for (w = 0 ; w < data.wids.length ; w++)
                 {document.getElementById (data.wids[w]).selected = true;}
                 metadata_free();
             }
         }
 
+        metadata_busy(1);
         selw.removeAttribute ("disabled");
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {selw.selectedOptions[w].selected = false;}
-        metadata_busy(1);
         connection.open("GET", "/metadata/collate?tid=" + selt.value, true);
         connection.send();
     }

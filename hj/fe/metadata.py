@@ -3,12 +3,34 @@
 
 from hj.fe import fapp
 
+import flask
 import hj.db
+import hj.util.geo
 import json
 
 @fapp.route ('/metadata/collate', methods=['GET'])
-def collate (tid:str)->bytes:
-    content = {'map':'', 'wids':[]}
+def collate ()->bytes:
+    content = {'map':{}, 'wids':[]}
+    tid = flask.request.args.get ('tid')
+    t = hj.db.fetch ([tid])[tid]
+    ml = [m for m in filter (lambda m:m.any (t.get_points()),
+                             hj.db.filter (hj.db.EntryType.map))]
+    ws = hj.db.filter (hj.db.EntryType.waypt)
+    for i in  hj.util.geo.indices (t, ws):
+        content['wids'].append (ws[i].get_fingerprint())
+        pass
+
+    if len(ml) == 0  or not hj.util.geo.Joined (ml=ml).all (t.get_points()):
+        print ('Need to get some bloody maps from USGS!!!!!')
+        print ('  track: ' + t.get_label())
+    else: # else should not be here when can autoload the maps
+        m = hj.util.geo.Joined (ml=ml)
+        m.overlay (t.get_points())
+        coords = [] if len (ws) == 0 else \
+                 m.overlay ([w.get_points()[0] for w in ws))
+        content['map']['fingerprint'] = m.fingerprint()
+        content['map']['waypts'] = coords
+        pass
     return json.dumps (content).encode()
 
 @fapp.route ('/metadata/photos', methods=['GET'])

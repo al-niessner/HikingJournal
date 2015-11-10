@@ -16,10 +16,10 @@ class EntryType(enum.Enum):
     entry = 3
     map   = 4 # hj.Map instance
     photo = 7
-    raw   = 6 # raw files that other elements reference
-    route = 0
-    track = 1
-    waypt = 2
+    raw   = 6 # raw files that are referenced by either map or photo
+    route = 0 # instance of hj.GPSElement
+    track = 1 # instance of hj.GPSElement
+    waypt = 2 # instance of hj.GPSElement
     pass
 
 def _id (data:bytes, id:str=None)->str:
