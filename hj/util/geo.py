@@ -15,11 +15,37 @@ LON = 1
 TIM = 3
 
 class Joined(hj.Map):
-    def __init__ (self, ml:[hj.Map]=None, fp;str=None):
+    def __init__ (self, ml:[hj.Map]=None, fp:str=None):
         if (ml is None and fp is None) or (ml is not None and fp is not None):
             raise ValueError('Initialization is either by a list of maps or a fingerprint')
-        if fp: ml = hj.db.fetch (fp.split (','))
+        if fp: ml = hj.db.fetch (fp.split (':'))
+        else: ml = dict([(m.get_fingerprint(), m) for m in ml])
+
+        self.__fp = ':'.join (sorted ([k for k in ml.keys()]))
+        self.__ml = ml
+        self.__name = ':'.join ([ml[k].get_name() for k in sorted (ml.keys())])
         return
+
+    def all (self, pts:[hj.Map.Point])->bool:
+        return len (self.which (pts)) == len (pts)
+
+    def any (self, pts:[hj.Map.Point])->bool:
+        return any ([m.any (pts) for m in self.__ml])
+    
+    def get_fingerprint(self)->str: return self._fp
+        
+    def get_image(self)->numpy.array:
+        raise NotImplementedError()
+
+    def get_name(self)->str: return self.__name
+
+    def overlay (self, data:[hj.Map.Point], icon:numpy.array=None)->[hj.Map.Pixel]:
+        raise NotImplementedError()
+    
+    def which (self, pts:[hj.Map.Point])->[int]:
+        idx = set()
+        for m in self.__ml.values(): idx.update (set (m.which (pts)))
+        return sorted (idx)
     pass
 
 def as_numpy_array (pts:[hj.GPSElement.Point], naxis=2)->numpy.array:

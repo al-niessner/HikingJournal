@@ -197,7 +197,7 @@ class Map(object):
         '''
         raise NotImplementedError()
 
-    def overlay (self, data:[Point], icon:numpy.array=None)->[PIXEL]:
+    def overlay (self, data:[Point], icon:numpy.array=None)->[Pixel]:
         '''Overlay data onto the map (temporary)
 
         The overlay is temporary and is not recorded in the database!
@@ -212,7 +212,7 @@ class Map(object):
         '''
         raise NotImplementedError()
     
-    def which (pts:[Point])->[int]:
+    def which (self, pts:[Point])->[int]:
         '''Determine which of the points are contained within the map
 
         Returns the index of those points that are contained within this map

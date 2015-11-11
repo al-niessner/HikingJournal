@@ -27,7 +27,7 @@ def collate ()->bytes:
         m = hj.util.geo.Joined (ml=ml)
         m.overlay (t.get_points())
         coords = [] if len (ws) == 0 else \
-                 m.overlay ([w.get_points()[0] for w in ws))
+                 m.overlay ([w.get_points()[0] for w in ws])
         content['map']['fingerprint'] = m.fingerprint()
         content['map']['waypts'] = coords
         pass
