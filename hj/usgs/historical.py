@@ -8,6 +8,7 @@ import numpy
 import os
 import osgeo.ogr
 import osgeo.osr
+import pickle
 
 class NotUSGSHistoricalError(Exception): pass
 
@@ -81,7 +82,9 @@ class Quad(hj.Map):
                                       Oy=p1.GetY(),
                                       Py=(p4.GetY() - p3.GetY()) / self._cols,
                                       Ly=(p3.GetY() - p1.GetY()) / self._rows)
-            self._fingerprint = hj.db.archive (hj.db.EntryType.raw, fn, fp)
+            self._rawfp = hj.db.archive (hj.db.EntryType.raw, fn, fp)
+            self._fingerprint = hj.db._id (pickle.dumps
+                                           (self, pickle.HIGHEST_PROTOCOL))
         else: raise NotUSGSHistoricalError(fn + ' is not a valid file')
         return
 
@@ -105,7 +108,7 @@ class Quad(hj.Map):
     def _affine_transform(self)->hj.Map.Affine: return self._wat
     
     def get_image(self)->numpy.array:
-        ds = gdal.Open (os.path.join (hj.config.wdir, self._fingerprint))
+        ds = gdal.Open (os.path.join (hj.config.wdir, self._rawfp))
         rgb = ds.ReadAsArray()
         img = numpy.empty (rgb.shape[1:] + (3,), dtype=numpy.uint8)
         for i in range(3): img[:,:,i] = rgb[i]        
@@ -114,7 +117,10 @@ class Quad(hj.Map):
     def get_fingerprint(self)->str: return self._fingerprint
     def get_name(self)->str: return self._name
     def get_pixel_bb(self)->[hj.Map.Pixel]: return self._pix.copy()
+    def get_rawfp (self)->str: return self._rawfp
     def get_wgs84_bb(self)->[hj.Map.Point]: return self._wgs.copy()
+    def raw_shape(self)->hj.Map.Pixel: return hj.Map.Pixel(row=self._rows,
+                                                           col=self._cols)
     pass
 
 def scan (start:str, recurse:str)->None:
@@ -125,8 +131,11 @@ def scan (start:str, recurse:str)->None:
         fp = hj.db._rid (ffn)
 
         if known.count (fp) == 0:
-            try: known.append (hj.db.archive (hj.db.EntryType.map,
-                                              Quad(ffn,fp)))
+            try:
+                q = Quad(ffn, fp)
+                known.append (q.get_fingerprint())
+                hj.db.archive (hj.db.EntryType.map, q, q.get_fingerprint())
+                pass
             except NotUSGSHistoricalError: log.exception('Ignoring invlid file')
         pass
     return

@@ -28,7 +28,7 @@ def collate ()->bytes:
         m.overlay (t.get_points())
         coords = [] if len (ws) == 0 else \
                  m.overlay ([w.get_points()[0] for w in ws])
-        content['map']['fingerprint'] = m.fingerprint()
+        content['map']['fingerprint'] = m.get_fingerprint()
         content['map']['waypts'] = coords
         pass
     return json.dumps (content).encode()

@@ -1,5 +1,6 @@
 
 import collections
+import enum
 import numpy
 
 class Annotated(object):
@@ -106,6 +107,15 @@ class GPSElement(object):
         '''The list of GPS data'''
         raise NotImplementedError()
 
+    def get_rawfp (self)->str:
+        '''Return the fingerprint of the raw content backed by this wrapper
+
+        If this object backs a raw content item, then it should return a
+        string represeting the fingerprint of the raw content. Otherwise, it
+        should not implement this method resulting in a NotImplementedError.
+        '''
+        raise NotImplementedError('Not backed by a raw object')
+    
     def get_type (self):
         '''Return the hj.db.EntryType for route, track, or waypoint'''
         raise NotImplementedError()
@@ -125,6 +135,13 @@ class GPSElement(object):
     pass
 
 class Map(object):
+    class Corner(enum.Enum):
+        NorthEast = 0
+        SouthEast = 1
+        SouthWest = 2
+        NorthWest = 3
+        pass
+    
     # the affine transform given pixel p and line l in a raster is:
     #   X(p,l) = Ox + Px * p + Lx * l
     #   Y(p,l) = Oy + Py * p + Ly * l
@@ -192,25 +209,41 @@ class Map(object):
         '''
         raise NotImplementedError()
 
+    def get_rawfp (self)->str:
+        '''Return the fingerprint of the raw content backed by this wrapper
+
+        If this object backs a raw content item, then it should return a
+        string represeting the fingerprint of the raw content. Otherwise, it
+        should not implement this method resulting in a NotImplementedError.
+        '''
+        raise NotImplementedError('Not backed by a raw object')
+    
     def get_wgs84_bb(self)->[Point]:
         '''Return the bounding box in WGS84 coordinates
         '''
         raise NotImplementedError()
 
-    def overlay (self, data:[Point], icon:numpy.array=None)->[Pixel]:
-        '''Overlay data onto the map (temporary)
+    def inverse (self, p:Point, ca:float=0.5, ra:float=0.5)->Pixel:
+        '''Use the inverse affine to copute the Pixel from a Point
 
-        The overlay is temporary and is not recorded in the database!
-        All overlays are accumulated and can be viewed by calling get_image().
-        
-        data : the GPS data to lay onto the map
-        icon : when None, the data is connected via linear interpolation
-               otherwise the icon array is centered at the given locations
-               
-        Returns a list of the pixel locations of those centers or an empty list
-                when icon is None.
+        ca : column adjust where 0.5 mimics rounding
+        ra : row adjust where 0.5 mimics rounding
+        '''
+        T = self._affine_transform()
+        Ox = p.lon - T.Ox
+        Oy = p.lat - T.Oy
+        return Map.Pixel(col=int((Oy/T.Ly - Ox/T.Lx)/(T.Py/T.Ly - T.Px/T.Lx) + .5),
+                         row=int((Oy/T.Py - Ox/T.Px)/(T.Ly/T.Py - T.Lx/T.Px) + .5))
+
+    def raw_shape(self)->Pixel:
+        '''Return the number of rows and columns for the entire image
         '''
         raise NotImplementedError()
+
+    def transform (self, p:Pixel)->Point:
+        T = self._affine_transform()
+        return Map.Point(lat=T.Oy + T.Py*p.col + T.Ly*p.row,
+                         lon=T.Ox + T.Px*p.col + T.Lx*p.row)
     
     def which (self, pts:[Point])->[int]:
         '''Determine which of the points are contained within the map
