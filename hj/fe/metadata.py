@@ -8,6 +8,8 @@ import hj.db
 import hj.util.geo
 import json
 import matplotlib.image
+import os
+import tempfile
 
 @fapp.route ('/metadata/collate', methods=['GET'])
 def collate ()->bytes:
@@ -31,9 +33,22 @@ def collate ()->bytes:
                  m.overlay ([w.get_points()[0] for w in ws], True)
         content['map']['fingerprint'] = m.get_fingerprint()
         content['map']['waypts'] = coords
-        matplotlib.image.imsave ('/tmp/overlay.png', m.get_image())
+        fid,fn = tempfile.mkstemp (prefix='mdmap', suffix='.png')
+        os.close (fid)
+        matplotlib.image.imsave (fn, m.get_image())
+        content['map']['name'] = fn
         pass
     return json.dumps (content).encode()
+
+@fapp.route ('/metadata/load/<path:fn>', methods=['GET'])
+def load (fn:str)->bytes:
+    img = b''
+
+    if not fn.startswith ('/'): fn = os.path.join ('/', fn)
+    if os.path.isfile (fn):
+        with open (fn, 'rb') as f: img = f.read()
+        pass
+    return img
 
 @fapp.route ('/metadata/photos', methods=['GET'])
 def photos()->bytes:

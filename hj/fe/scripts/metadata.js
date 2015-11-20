@@ -93,6 +93,7 @@ function metadata_load (lname, nname)
 function metadata_selt()
 {
     console.log ("selected a track...");
+    var map = document.getElementById ("map");
     var selp = document.getElementById ("photo_list");
     var selt = document.getElementById ("track_list");
     var selw = document.getElementById ("waypt_list");
@@ -115,9 +116,10 @@ function metadata_selt()
             {
                 var data = JSON.parse (connection.responseText);
 
-                console.log (data.wids)
+                console.log (data)
                 for (w = 0 ; w < data.wids.length ; w++)
                 {document.getElementById (data.wids[w]).selected = true;}
+                map.innerHTML = '<img alt="USGS Map" class="display" src="/metadata/load' + data.map.name + '"/><p>' + data.map.name + '</p>';
                 metadata_free();
             }
         }
