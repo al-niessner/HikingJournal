@@ -17,7 +17,7 @@ def collate ()->bytes:
     ml = [m for m in filter (lambda m:m.any (t.get_points()),
                              hj.db.filter (hj.db.EntryType.map))]
     ws = hj.db.filter (hj.db.EntryType.waypt)
-    for i in  hj.util.geo.indices (t, ws):
+    for i in  hj.util.geo.indices (t, ws): # REF: 2, indices still is not right!
         content['wids'].append (ws[i].get_fingerprint())
         pass
     m = None if len (ml) == 0 else  hj.util.geo.Joined (ml=ml)

@@ -364,8 +364,8 @@ class Joined(hj.Map):
                     pass
                 pass
             pass
-        # FIXME: the filter below should not be required because the waypoint
-        #        should not be included if it is not in the bounding box!
+        # FIXME: 2, the filter below should not be required because the waypoint
+        #           should not be included if it is not in the bounding box!
         gdata = [p for p in filter (lambda x:x is not None, gdata)]
         
         if icon:
@@ -442,6 +442,7 @@ def corner (pts:[hj.Map.Point], which:hj.Map.Corner)->hj.Map.Point:
     return pts[d.index (min (d))]
 
 def indices (t:hj.GPSElement, ws:[hj.GPSElement]):
+    # FIXME: 2, finding waypoints that more than 100 meters from the trail
     gt = as_ogr_line (t)
     d = []
     for w in ws:
