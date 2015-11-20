@@ -7,6 +7,7 @@ import flask
 import hj.db
 import hj.util.geo
 import json
+import matplotlib.image
 
 @fapp.route ('/metadata/collate', methods=['GET'])
 def collate ()->bytes:
@@ -19,17 +20,18 @@ def collate ()->bytes:
     for i in  hj.util.geo.indices (t, ws):
         content['wids'].append (ws[i].get_fingerprint())
         pass
-
-    if len(ml) == 0  or not hj.util.geo.Joined (ml=ml).all (t.get_points()):
+    m = None if len (ml) == 0 else  hj.util.geo.Joined (ml=ml)
+    
+    if m is None or not m.all (t.get_points()):
         print ('Need to get some bloody maps from USGS!!!!!')
         print ('  track: ' + t.get_label())
     else: # else should not be here when can autoload the maps
-        m = hj.util.geo.Joined (ml=ml)
         m.overlay (t.get_points())
         coords = [] if len (ws) == 0 else \
-                 m.overlay ([w.get_points()[0] for w in ws])
+                 m.overlay ([w.get_points()[0] for w in ws], True)
         content['map']['fingerprint'] = m.get_fingerprint()
         content['map']['waypts'] = coords
+        matplotlib.image.imsave ('/tmp/overlay.png', m.get_image())
         pass
     return json.dumps (content).encode()
 

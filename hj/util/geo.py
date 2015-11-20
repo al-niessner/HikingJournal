@@ -5,6 +5,7 @@ import collections
 import hj
 import hj.db
 import matplotlib.mlab
+import matplotlib.pyplot
 import numpy
 import os
 import osgeo.ogr
@@ -26,6 +27,9 @@ class Joined(hj.Map):
         if fp: md = hj.db.fetch (fp.split (':'))
         else: md = dict([(m.get_fingerprint(), m) for m in ml])
 
+        self._cyan = numpy.array([0,255,255])
+        self._magenta = numpy.array([255,0,255])
+        
         self._fp = ':'.join (sorted ([k for k in md.keys()]))
         self._md = md
         self._name = ':'.join ([md[k].get_name() for k in sorted (md.keys())])
@@ -33,6 +37,17 @@ class Joined(hj.Map):
         self._bb()
         self._make_fm()
         self._fill_fm()
+
+        # build local footprint when drawing track
+        x,y = numpy.meshgrid ([x for x in range (15)], [y for y in range (15)])
+        R = numpy.sqrt ((x - 7)**2 + (y - 7)**2)
+        matplotlib.pyplot.imshow (R < 7.25)
+        idx = matplotlib.mlab.find (R < 7.25)
+        fp = numpy.empty ((len (idx), 2),dtype=numpy.int8)
+        fp[:,0] = idx/15
+        fp[:,1] = idx - fp[:,0]*15        
+        self._mask = fp - 7
+        self._fps = (15,15)
         return
 
     def _oml(self): return [self._md[k] for k in sorted (self._md.keys())]
@@ -99,11 +114,11 @@ class Joined(hj.Map):
 
     def _fill_fm (self)->None:
         fmm = numpy.empty (self._fm.shape[:-1], dtype=numpy.bool)
-        fmi = numpy.empty (fmm.shape + (2,), dtype=numpy.int)
+        fmi = numpy.empty (fmm.shape + (2,), dtype=numpy.int32)
         fmi[:,:,0],fmi[:,:,1] = numpy.meshgrid ([c for c in range (fmm.shape[1])], [r for r in range(fmm.shape[0])])
         for cb,m in zip(self._cb, self._oml()):
             imm = numpy.empty (m.raw_shape(), dtype=numpy.bool).transpose()
-            imi = numpy.empty (imm.shape + (2,))
+            imi = numpy.empty (imm.shape + (2,), dtype=numpy.int32)
             imi[:,:,0],imi[:,:,1] = numpy.meshgrid ([c for c in range (imm.shape[1])], [r for r in range(imm.shape[0])])
             pimg = matplotlib.path.Path([(p.col, p.row) for p in [cb.nw, cb.ne, cb.se, cb.sw, cb.nw]])
             pfm = matplotlib.path.Path([(cb.offset.col + p.col - cb.nw.col, cb.offset.row + p.row - cb.nw.row) for p in [cb.nw, cb.ne, cb.se, cb.sw, cb.nw]])
@@ -207,6 +222,37 @@ class Joined(hj.Map):
             pass
         return
     
+    def _segment (lp, p, fms, fp, fps):
+        alp = numpy.array([lp.row, lp.col])
+        ap = numpy.array([p.row, p.col])
+        clp = fp + alp
+        clp[clp < 0] = 0
+        cp = fp + ap
+        cp[cp < 0] = 0
+        ue,be = fps[0]//2, fps[0] - fps[0]//2
+        le,re = fps[1]//2, fps[1] - fps[1]//2
+        pts = [tuple(clp[i]) for i in range (clp.shape[0])]
+        pts.extend ([tuple(cp[i]) for i in range (cp.shape[0])])
+            
+        if p.col == lp.col:
+            for r in range (min (p.row, lp.row),max (p.row, lp.row)+1):
+                for c in range (max (0, p.col-le), min (p.col+re, fms[1])): pts.append ((r, c))
+                pass
+        elif p.row == lp.row:
+            for c in range (min (p.col, lp.col),max (p.col, lp.col)+1):
+                for r in range (max (0, p.row-ue), min (p.row+be, fms[0])): pts.append ((r, c))
+                pass
+        else:
+            c,r = numpy.meshgrid ([c for c in range (max (0, min (p.col, lp.col) - le), min (max (p.col, lp.col)+re, fms[1]))],
+                                  [r for r in range (max (0, min (p.row, lp.row) - ue), min (max (p.row, lp.row)+be, fms[0]))])
+            dc = p.col - lp.col
+            dr = p.row - lp.row
+            dcr = p.col * lp.row - p.row * lp.col
+            d = abs (dr*c - dc*r + dcr) / numpy.sqrt (dc*dc + dr*dr)
+            pts.extend ([(pr,pc) for pr,pc in zip(r[d<ue],c[d<le])])
+            pass
+        return pts
+
     def _tile(self)->None:
         ml = [v for v in self._md.values()]
         tile = numpy.empty ((1,1,2))
@@ -306,7 +352,52 @@ class Joined(hj.Map):
         Returns a list of the pixel locations of those centers or an empty list
                 when icon is None.
         '''
-        raise NotImplementedError()
+        pdata = [(p.lon, p.lat) for p in data]
+        gdata = [None for p in data]
+        for bb,cb,mm in zip (self._bb, self._cb, self._oml()):
+            pbb = matplotlib.path.Path([(p.lon,p.lat) for p in mm.get_wgs84_bb()])
+            for i,yes in enumerate (pbb.contains_points (pdata)):
+                if yes:
+                    lp = mm.inverse (data[i])
+                    gdata[i] = hj.Map.Pixel(col=lp.col + cb.offset.col - cb.nw.col,
+                                            row=lp.row + cb.offset.row - cb.nw.row)
+                    pass
+                pass
+            pass
+        # FIXME: the filter below should not be required because the waypoint
+        #        should not be included if it is not in the bounding box!
+        gdata = [p for p in filter (lambda x:x is not None, gdata)]
+        
+        if icon:
+            for p in gdata:
+                vp = self._fm[max ([0, p.row-17]):min ([p.row+18,
+                                                        self._fm.shape[0]]),
+                              max ([0, p.col-17]):min ([p.col+18,
+                                                        self._fm.shape[1]]),:]
+                vp[:] = vp + numpy.uint8 (0.4 * (self._cyan - vp))
+                pass
+        else:
+            lp = gdata[0]
+            pts = []
+            seg = []
+            for p in gdata:
+                if self._fps[0]//2 < numpy.sqrt ((p.col - lp.col)**2 +
+                                                 (p.row - lp.row)**2):
+                    seg.append ((lp, p, self._fm.shape, self._mask, self._fps))
+                    lp = p
+                    pass
+                pass
+            seg = [Joined._segment (*s) for s in seg]
+            for s in seg: pts.extend ([self._fm.shape[1]*int(p[0]) + int(p[1])
+                                       for p in s])
+            for pt in set(pts):
+                rc = (pt//self._fm.shape[1],
+                      pt - (pt//self._fm.shape[1])*self._fm.shape[1])
+                self._fm[rc] = self._fm[rc] + \
+                               numpy.uint8(0.6 * (self._magenta - self._fm[rc]))
+                pass
+            pass
+        return gdata
     
     def which (self, pts:[hj.Map.Point])->[int]:
         idx = set()
