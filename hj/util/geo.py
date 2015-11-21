@@ -368,10 +368,12 @@ class Joined(hj.Map):
                     pass
                 pass
             pass
-        # FIXME: 2, the filter below should not be required because the waypoint
-        #           should not be included if it is not in the bounding box!
-        print (icon, len (data), sum ([p is None for p in gdata]))
-        gdata = [p for p in filter (lambda x:x is not None, gdata)]
+
+        if any ([p is None for p in gdata]):
+            raise ValueError('GPSElement is over the edge of the map? ' +
+                             'Waypoint: ' + str (icon) +
+                             (', total: %d, outside %d' %
+                              len (data), sum ([p is None for p in gdata]))
         
         if icon:
             for p in gdata:
@@ -428,8 +430,7 @@ def as_ogr_line (t:hj.GPSElement):
 def as_ogr_point (w:hj.GPSElement):
     g = osgeo.ogr.Geometry(osgeo.ogr.wkbPoint)
     g.AddPoint (w.get_points()[0].lon,
-                w.get_points()[0].lat,
-                w.get_points()[0].elev)
+                w.get_points()[0].lat)
     return g
 
 def corner (pts:[hj.Map.Point], which:hj.Map.Corner)->hj.Map.Point:
@@ -447,7 +448,6 @@ def corner (pts:[hj.Map.Point], which:hj.Map.Corner)->hj.Map.Point:
     return pts[d.index (min (d))]
 
 def indices (t:hj.GPSElement, ws:[hj.GPSElement]):
-    # FIXME: 2, finding waypoints that more than 100 meters from the trail
     gt = as_ogr_line (t)
     d = []
     for w in ws:
