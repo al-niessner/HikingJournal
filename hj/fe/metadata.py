@@ -4,11 +4,13 @@
 from hj.fe import fapp
 
 import flask
+import hj.config
 import hj.db
 import hj.util.geo
 import json
 import matplotlib.image
 import os
+import subprocess
 import tempfile
 
 @fapp.route ('/metadata/collate', methods=['GET'])
@@ -54,6 +56,12 @@ def load (fn:str)->bytes:
 def photos()->bytes:
     content = [w.as_dict() for w in hj.db.filter (hj.db.EntryType.photo)]
     return json.dumps (content).encode()
+
+@fapp.route ('/metadata/spawn/<path:fn>', methods=['PUT'])
+def spawn (fn:str)->bytes:
+    if not fn.startswith ('/'): fn = os.path.join ('/', fn)
+    if os.path.isfile (fn): subprocess.Popen([hj.config.viewer, fn])
+    return b''
 
 @fapp.route ('/metadata/tracks', methods=['GET'])
 def tracks()->bytes:

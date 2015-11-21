@@ -92,7 +92,6 @@ function metadata_load (lname, nname)
 
 function metadata_selt()
 {
-    console.log ("selected a track...");
     var map = document.getElementById ("map");
     var selp = document.getElementById ("photo_list");
     var selt = document.getElementById ("track_list");
@@ -100,9 +99,7 @@ function metadata_selt()
 
     if (selt.value === "reset")
     {
-        console.log ('   clear content...');
         document.getElementById ("map").innerHTML = "";
-        console.log (selw);
         selw.setAttribute ("disabled","");
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {selw.selectedOptions[w].selected = false;}
@@ -119,7 +116,7 @@ function metadata_selt()
                 console.log (data)
                 for (w = 0 ; w < data.wids.length ; w++)
                 {document.getElementById (data.wids[w]).selected = true;}
-                map.innerHTML = '<img alt="USGS Map" class="display" src="/metadata/load' + data.map.name + '"/><p>' + data.map.name + '</p>';
+                map.innerHTML = '<img alt="USGS Map" class="display" src="/metadata/load' + data.map.name + '"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>';
                 metadata_free();
             }
         }
@@ -131,6 +128,14 @@ function metadata_selt()
         connection.open("GET", "/metadata/collate?tid=" + selt.value, true);
         connection.send();
     }
+}
+
+function metadata_spawn()
+{
+    var connection = new XMLHttpRequest();
+    var spawn = document.getElementById ("external_viewer");
+    connection.open("PUT", "/metadata/spawn" + spawn.name, true);
+    connection.send();
 }
 
 function metadata_update()

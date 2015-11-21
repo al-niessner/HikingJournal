@@ -27,8 +27,12 @@ class Joined(hj.Map):
         if fp: md = hj.db.fetch (fp.split (':'))
         else: md = dict([(m.get_fingerprint(), m) for m in ml])
 
+        self._blue = numpy.array([0,0,255])
         self._cyan = numpy.array([0,255,255])
+        self._green = self._cyan - self._blue
         self._magenta = numpy.array([255,0,255])
+        self._red = self._magenta - self._blue
+        self._yellow = self._green + self._red
         
         self._fp = ':'.join (sorted ([k for k in md.keys()]))
         self._md = md
@@ -355,26 +359,27 @@ class Joined(hj.Map):
         pdata = [(p.lon, p.lat) for p in data]
         gdata = [None for p in data]
         for bb,cb,mm in zip (self._bb, self._cb, self._oml()):
-            pbb = matplotlib.path.Path([(p.lon,p.lat) for p in mm.get_wgs84_bb()])
+            pbb = matplotlib.path.Path([(p.lon, p.lat) for p in bb])
             for i,yes in enumerate (pbb.contains_points (pdata)):
                 if yes:
                     lp = mm.inverse (data[i])
-                    gdata[i] = hj.Map.Pixel(col=lp.col + cb.offset.col - cb.nw.col,
-                                            row=lp.row + cb.offset.row - cb.nw.row)
+                    gdata[i] = hj.Map.Pixel(col=lp.col+cb.offset.col-cb.nw.col,
+                                            row=lp.row+cb.offset.row-cb.nw.row)
                     pass
                 pass
             pass
         # FIXME: 2, the filter below should not be required because the waypoint
         #           should not be included if it is not in the bounding box!
+        print (icon, len (data), sum ([p is None for p in gdata]))
         gdata = [p for p in filter (lambda x:x is not None, gdata)]
         
         if icon:
             for p in gdata:
-                vp = self._fm[max ([0, p.row-17]):min ([p.row+18,
-                                                        self._fm.shape[0]]),
-                              max ([0, p.col-17]):min ([p.col+18,
-                                                        self._fm.shape[1]]),:]
-                vp[:] = vp + numpy.uint8 (0.4 * (self._cyan - vp))
+                self._fm[max ([0, p.row-17]):min ([p.row+18,
+                                                   self._fm.shape[0]]),
+                         max ([0, p.col-17]):min ([p.col+18,
+                                                   self._fm.shape[1]]),:] = \
+                                                   self._blue
                 pass
         else:
             lp = gdata[0]

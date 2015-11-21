@@ -24,6 +24,7 @@ def initialize():
     hj.config.dt = hj.device.Type.local_file.name
     hj.config.garmin_etrex_10__mp = '${HOME}'
     hj.config.local_file__dir = '${HOME}'
+    hj.config.viewer = '/usr/bin/eog'
     return
 
 def load (fn):
