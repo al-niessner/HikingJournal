@@ -29,6 +29,7 @@ def collate ()->bytes:
     if m is None or not m.all (t.get_points()):
         print ('Need to get some bloody maps from USGS!!!!!')
         print ('  track: ' + t.get_label())
+        print ('  first: ' + str(t.get_points()[0].lat) + ' ' + str(t.get_points()[0].lon))
     else: # else should not be here when can autoload the maps
         m.overlay (t.get_points())
         coords = [] if len (ws) == 0 else m.overlay ([w.get_points()[0] for w in
