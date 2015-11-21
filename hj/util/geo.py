@@ -373,7 +373,7 @@ class Joined(hj.Map):
             raise ValueError('GPSElement is over the edge of the map? ' +
                              'Waypoint: ' + str (icon) +
                              (', total: %d, outside %d' %
-                              len (data), sum ([p is None for p in gdata]))
+                              len (data), sum ([p is None for p in gdata])))
         
         if icon:
             for p in gdata:
