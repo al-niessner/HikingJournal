@@ -57,12 +57,13 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
 - [ ] manage metadata
   - [ ] ideal workflow step 2
     - [ ] find Quad map(s) associated with a route, track, or waypoint
-      - [ ] search local db for map
+      - [x] search local db for map
       - [ ] search usgs for map
-    - [ ] find waypoints that go along with track
-      - [ ] manually remove them
-      - [ ] manually add them
-    - [ ] change descriptions and labels for all data involved (reuse import.js?)
+    - [x] find waypoints that go along with track
+      - [x] manually remove them
+      - [x] manually add them
+      * Note: because it takes so long to generate the map, it will not be updated when the waypoint list changes
+    - [x] change descriptions and labels for all data involved (reuse import.js?)
   - [ ] ideal workflow step 3
     - [ ] add pictures from file system : in-place reference?
     - [ ] correlate pictures with tracks via time
