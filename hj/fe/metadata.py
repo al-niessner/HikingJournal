@@ -25,7 +25,7 @@ def collate ()->bytes:
         content['wids'].append (ws[i].get_fingerprint())
         pass
     m = None if len (ml) == 0 else  hj.util.geo.Joined (ml=ml)
-    
+
     if m is None or not m.all (t.get_points()):
         print ('Need to get some bloody maps from USGS!!!!!')
         print ('  track: ' + t.get_label())
