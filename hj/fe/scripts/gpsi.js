@@ -34,8 +34,9 @@ function gpsi_advance (direction)
     }
 
     var block = '<p style="margin:0;"><b>' + title + "</b></p>";
+
     block += '<p style="color:DarkGray;margin:0;text-indent:25px;"><small>device file name: ' + data.name + '</small></p>';
-    block += '<p style="margin:0;text-indent:25px;"><a href="http://maps.google.com/maps?zoom=12&t=m&q=loc:' + data.first.lat + '+' + data.first.lon + '" target="_blank">First GPS Location</a></p>'
+    block += '<p style="margin:0;text-indent:25px;"><a href="/viewport/open?id=' + data.fingerprint + '" target="_blank">View Data</a></p>'
     block += '<br/><label>Label:</label><input id="label_input" style="margin-right:10%; margin-left:1%;" size="80%" type="text" value="' + data.label + '"><br>'
     block += '<label>Description:</label><textarea id="descr_input" style="margin-right:10%; margin-left:5%;" rows="10" cols="80%">' + data.description + '</textarea>'
     workspace.innerHTML = block;

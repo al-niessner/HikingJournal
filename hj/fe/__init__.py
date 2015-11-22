@@ -36,6 +36,7 @@ def run (port:int)->None:
     import hj.fe.input
     import hj.fe.metadata
     import hj.fe.pages
+    import hj.fe.viewport
 
     d = cherrypy.wsgiserver.WSGIPathInfoDispatcher({'/':fapp})
     hj.fe._server = cherrypy.wsgiserver.CherryPyWSGIServer(('0.0.0.0', port), d)
