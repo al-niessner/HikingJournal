@@ -125,7 +125,7 @@ class Quad(hj.Map):
 
 def scan (start:str, recurse:str)->None:
     '''Scan a directory for USGS Quad maps'''
-    known = [m.get_fingerprint() for m in hj.db.filter (hj.db.EntryType.map)]
+    known = [m.get_rawfp() for m in hj.db.filter (hj.db.EntryType.map)]
     for wdir, fn in hj.util.path.homogenize (start, recurse):
         ffn = os.path.join (wdir, fn)
         fp = hj.db._rid (ffn)

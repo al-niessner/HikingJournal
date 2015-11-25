@@ -424,7 +424,7 @@ def as_numpy_array (pts:[hj.GPSElement.Point], naxis=2)->numpy.array:
 
 def as_ogr_line (t:hj.GPSElement):
     gt = osgeo.ogr.Geometry(osgeo.ogr.wkbLineString)
-    for p in t.get_points(): gt.AddPoint(p.lon, p.lat, p.elev)
+    for p in t.get_points(): gt.AddPoint(p.lon, p.lat)
     return gt
 
 def as_ogr_point (w:hj.GPSElement):

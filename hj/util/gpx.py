@@ -4,17 +4,20 @@ import hj
 import hj.db
 import io
 import os
+import osgeo.ogr
 
 class Element(hj.GPSElement):
-    def __init__ (self, bfn:str, points:[hj.GPSElement.Point], typ:hj.db.EntryType):
+    def __init__ (self, bfn:str, points:[hj.GPSElement.Point],
+                  typ:hj.db.EntryType, label:str=''):
         '''Initialize a GPX Element type
 
         bfn  - the base file name assigned by the device
         data - the gpxpy parsed data to be archived
         '''
+        hj.GPSElement.__init__(self)
         self._desc = ''
         self._fp = hj.db._id ((typ.name + str(points)).encode())
-        self._label = ''
+        self._label = label
         self._name = bfn
         self._points = points
         self._type = typ
@@ -52,14 +55,37 @@ def parse (data:io.TextIOBase, fn:str)->[Element]:
                                                                lon=p.longitude,
                                                                time=p.time))
             pass
-        result.append (Element(bfn, pts, hj.db.EntryType.track))
-        result[-1].set_label (t.name)
+        result.extend (trim (Element(bfn, pts, hj.db.EntryType.track, t.name)))
     for w in gpx.waypoints:
         p = hj.GPSElement.Point(elev=w.elevation,
                                 lat=w.latitude,
                                 lon=w.longitude,
                                 time=w.time)
-        result.append (Element(bfn, [p], hj.db.EntryType.waypt))
-        result[-1].set_label (w.name)
+        result.append (Element(bfn, [p], hj.db.EntryType.waypt, w.name))
         pass
+    return result
+
+def trim (t:hj.GPSElement)->[hj.GPSElement]:
+    dl, dt, pts, result = [],[], t.get_points(),[t]
+    for i,p in enumerate(pts[:-1]):
+        g0 = osgeo.ogr.Geometry(osgeo.ogr.wkbPoint)
+        g0.AddPoint (p.lon, p.lat)
+        g1 = osgeo.ogr.Geometry(osgeo.ogr.wkbPoint)
+        g1.AddPoint (pts[i+1].lon, pts[i+1].lat)
+        dl.append (abs (g0.Distance (g1)) * 6.370e6 * 3.145927 / 180.)
+        dt.append ((pts[i+1].time - p.time).total_seconds())
+        pass
+    
+    if (8*3600 < max (dt) or 50e3 < max (dl)) and \
+           dt.index (max (dt)) == dl.index (max (dl)):
+        print ('Trimming:', t.get_label())
+        idx = dt.index (max(dt)) + 1
+
+        if 20 < idx: 
+            result = trim (Element(t._name, pts[:idx], t._type, t._label)) + \
+                     trim (Element(t._name, pts[idx:], t._type, t._label))
+        else: result = trim (Element(t._name, pts[idx:], t._type, t._label))
+        print (len (result), [len (t.get_points()) for t in result])
+        pass
+    
     return result
