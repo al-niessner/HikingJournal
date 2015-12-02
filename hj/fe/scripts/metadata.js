@@ -116,7 +116,27 @@ function metadata_selt()
                 console.log (data)
                 for (w = 0 ; w < data.wids.length ; w++)
                 {document.getElementById (data.wids[w]).selected = true;}
-                map.innerHTML = '<img alt="USGS Map" class="display" src="/metadata/load' + data.map.name + '"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>';
+
+                if ('name' in data.map)
+                {
+                    map.innerHTML = '<img alt="USGS Map" class="display" src="/metadata/load' + data.map.name + '"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>';
+                }
+                else
+                {
+                    if (data.map.constituents.length == 0)
+                    {
+                        map.innerHTML = '<h4>No maps for this area</h4>';
+                    }
+                    else
+                    {
+                        var clist = '<h4>Some data is contained within:</h4><ul>';
+
+                        for (i = 0 ; i < data.map.constituents.length ; i++)
+                        {clist += '<li>' + data.map.constituents[i] + '</li>';}
+                        clist += '</ul>';
+                        map.innerHTML = clist;
+                    }
+                }
                 metadata_free();
             }
         }

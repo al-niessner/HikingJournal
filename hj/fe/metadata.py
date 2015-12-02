@@ -20,6 +20,7 @@ def collate ()->bytes:
     t = hj.db.fetch ([tid])[tid]
     ml = [m for m in filter (lambda m:m.any (t.get_points()),
                              hj.db.filter (hj.db.EntryType.map))]
+    content['map']['constituents'] = sorted ([m.get_name() for m in ml])
     ws = hj.db.filter (hj.db.EntryType.waypt)
     for i in  hj.util.geo.indices (t, ws):
         content['wids'].append (ws[i].get_fingerprint())
@@ -32,9 +33,10 @@ def collate ()->bytes:
         print ('  first: ' + str(t.get_points()[0].lat) + ' ' + str(t.get_points()[0].lon))
     else: # else should not be here when can autoload the maps
         m.overlay (t.get_points())
-        coords = [] if len (ws) == 0 else m.overlay ([w.get_points()[0] for w in
-              filter (lambda w:0 < content['wids'].count (w.get_fingerprint()),
-                      ws)], True)
+        coords = [] if len (content['wids']) == 0 else m.overlay \
+                 ([w.get_points()[0] for w in
+                   filter (lambda w:0 < content['wids'].
+                           count (w.get_fingerprint()), ws)], True)
         content['map']['fingerprint'] = m.get_fingerprint()
         content['map']['waypts'] = coords
         fid,fn = tempfile.mkstemp (prefix='mdmap', suffix='.png')

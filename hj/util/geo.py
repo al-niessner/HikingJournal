@@ -134,21 +134,19 @@ class Joined(hj.Map):
     
     def _make_fm (self)->None:
         o = hj.Map.Pixel (0,0)
-        clipbox = [Clipbox(hj.Map.Pixel(-1,-1),o,o,o,o) for m in self._oml()]
-        height,width = numpy.zeros (self._tiles.shape),numpy.zeros (self._tiles.shape)
-        for rc,i in filter (lambda e:-1 < e[1], numpy.ndenumerate (self._tiles)):
+        n = hj.Map.Pixel(None,None)
+        clipbox = [Clipbox(n,o,o,o,o) for m in self._oml()]
+        for rc,i in filter (lambda e:-1 < e[1], numpy.ndenumerate(self._tiles)):
             r,c = rc
-            co,ro = 0 if c == 0 else -1,0 if r == 0 else -1
             bb,cb,m = self._bb[i],clipbox[i],self._oml()[i]
             nb = 0 < r and -1 < self._tiles[r-1,c]
             eb = c+1 < self._tiles.shape[1] and -1 < self._tiles [r,c+1]
             sb = r+1 < self._tiles.shape[0] and -1 < self._tiles [r+1,c]
             wb = 0 < c and -1 < self._tiles[r,c-1]
-
-            if nb or wb: nwc = m.inverse (corner (bb, hj.Map.Corner.NorthWest))
-            if nb or eb: nec = m.inverse (corner (bb, hj.Map.Corner.NorthEast))
-            if sb or wb: swc = m.inverse (corner (bb, hj.Map.Corner.SouthWest))
-            if sb or eb: sec = m.inverse (corner (bb, hj.Map.Corner.SouthEast))
+            nwc = m.inverse (corner (bb, hj.Map.Corner.NorthWest))
+            nec = m.inverse (corner (bb, hj.Map.Corner.NorthEast))
+            swc = m.inverse (corner (bb, hj.Map.Corner.SouthWest))
+            sec = m.inverse (corner (bb, hj.Map.Corner.SouthEast))
 
             cb = cb._replace (nw=hj.Map.Pixel (col=0 if not wb else nwc.col,
                                                row=0 if not nb else nwc.row),
@@ -159,46 +157,53 @@ class Joined(hj.Map):
                               se=hj.Map.Pixel (col=m.raw_shape().col-1 if not eb else sec.col,
                                                row=m.raw_shape().row-1 if not sb else sec.row))
             
-            if wb:
-                if -1 < clipbox[self._tiles[r,c-1]].offset.col: co = clipbox[self._tiles[r,c-1]].ne.col - (nwc.col - cb.nw.col)
-                if -1 < clipbox[self._tiles[r,c-1]].offset.row: ro = clipbox[self._tiles[r,c-1]].ne.row - (nwc.row - cb.nw.row)
+            if r == 0 or c == 0: cb = cb._replace \
+               (offset=hj.Map.Pixel(col=0 if c == 0 else None,
+                                    row=0 if r == 0 else None))
+            
+            if nb and not wb:
+                swc = m.inverse (corner (self._bb[self._tiles[r-1,c]],
+                                         hj.Map.Corner.SouthWest))
+                ocb = clipbox[self._tiles[r-1,c]]
+                cb = cb._replace (offset=hj.Map.Pixel
+                                  (col=nwc.col - swc.col,
+                                   row=ocb.offset.row+(ocb.ne.row-ocb.nw.row)))
                 pass
-            if nb:
-                if -1 < clipbox[self._tiles[r-1,c]].offset.col: co = clipbox[self._tiles[r-1,c]].sw.col - (nwc.col - cb.nw.col)
-                if -1 < clipbox[self._tiles[r-1,c]].offset.row: ro = clipbox[self._tiles[r-1,c]].sw.row - (nwc.row - cb.nw.row)
+        
+            if wb and not nb:
+                nec = m.inverse (corner (self._bb[self._tiles[r,c-1]],
+                                         hj.Map.Corner.NorthEast))
+                ocb = clipbox[self._tiles[r,c-1]]
+                cb = cb._replace (offset=hj.Map.Pixel
+                                  (col=ocb.offset.col+(ocb.ne.col-ocb.nw.col),
+                                   row=nwc.row - nec.row))
                 pass
-    
-            clipbox[i] = cb._replace (offset=hj.Map.Pixel(col=co, row=ro))
-            pass
-        while any([cb.offset.col == -1 or cb.offset.row == -1
-                   for cb in clipbox]):
-            for rc,i in filter (lambda e:-1 < e[1], numpy.ndenumerate (self._tiles)):
-                r,c = rc
-                co,ro = 0 if c == 0 else -1,0 if r == 0 else -1
-                bb,cb,m = self._bb[i],clipbox[i],self._oml()[i]
-                nb = 0 < r and -1 < self._tiles[r-1,c]
-                eb = c+1 < self._tiles.shape[1] and -1 < self._tiles [r,c+1]
-                sb = r+1 < self._tiles.shape[0] and -1 < self._tiles [r+1,c]
-                wb = 0 < c and -1 < self._tiles[r,c-1]
 
-                if -1 < cb.offset.col and -1 < cb.offset.row: continue
-
-                if nb or wb: nwc = m.inverse(corner(bb,hj.Map.Corner.NorthWest))
-                if nb or eb: nec = m.inverse(corner(bb,hj.Map.Corner.NorthEast))
-                if sb or wb: swc = m.inverse(corner(bb,hj.Map.Corner.SouthWest))
-                if sb or eb: sec = m.inverse(corner(bb,hj.Map.Corner.SouthEast))
+            if wb and nb:
+                ncb = clipbox[self._tiles[r-1,c]]
+                wcb = clipbox[self._tiles[r,c-1]]
+                cb = cb._replace (offset=hj.Map.Pixel
+                                  (col=wcb.offset.col+(wcb.ne.col-wcb.nw.col),
+                                   row=ncb.offset.row+(ncb.sw.row-ncb.nw.row)))
                 
-                if eb:
-                    if -1 < clipbox[self._tiles[r,c+1]].offset.col: co = clipbox[self._tiles[r,c+1]].offset.col - (nec.col - cb.nw.col)
-                    if -1 < clipbox[self._tiles[r,c+1]].offset.row: ro = clipbox[self._tiles[r,c+1]].offset.row - (nec.row - cb.nw.row)
-                    pass
-                if sb:
-                    if -1 < clipbox[self._tiles[r+1,c]].offset.col: co = clipbox[self._tiles[r+1,c]].offset.col - (swc.col - cb.nw.col)
-                    if -1 < clipbox[self._tiles[r+1,c]].offset.row: ro = clipbox[self._tiles[r+1,c]].offset.row - (swc.row - cb.nw.row)
+                if ncb.offset.col is None:
+                    nwc = m.inverse (corner (self._bb[self._tiles[r-1,c]],
+                                             hj.Map.Corner.NorthWest))
+                    swc = m.inverse (corner (self._bb[self._tiles[r-1,c]],
+                                             hj.Map.Corner.SouthWest))
+                    clipbox[self._tiles[r-1,c]] = ncb._replace (offset=hj.Map.Pixel(col=cb.offset.col - (swc.col - nwc.col) - (nwc.col - ncb.nw.col), row=ncb.offset.row))
                     pass
                 
-                clipbox[i] = cb._replace (offset=hj.Map.Pixel(col=co, row=ro))
+                if wcb.offset.row is None:
+                    nec = m.inverse (corner (self._bb[self._tiles[r,c-1]],
+                                             hj.Map.Corner.NorthEast))
+                    nwc = m.inverse (corner (self._bb[self._tiles[r,c-1]],
+                                             hj.Map.Corner.NorthWest))
+                    clipbox[self._tiles[r,c-1]] = wcb._replace (offset=hj.Map.Pixel(col=wcb.offset.col, row=cb.offset.row - (nec.col - nwc.col) - (nwc.col - wcb.nw.col)))
+                    pass
                 pass
+        
+            clipbox[i] = cb
             pass
         cols,rows = [],[]
         for c in range (self._tiles.shape[1]):
@@ -370,10 +375,11 @@ class Joined(hj.Map):
             pass
 
         if any ([p is None for p in gdata]):
-            raise ValueError('GPSElement is over the edge of the map? ' +
+            print (len (self._bb))
+            raise ValueError('GPSElement is over the edge of the map? \n\t' +
                              'Waypoint: ' + str (icon) +
-                             (', total: %d, outside %d' %
-                              len (data), sum ([p is None for p in gdata])))
+                             ('\n\ttotal: %d\n\toutside %d' %
+                              (len (data), sum ([p is None for p in gdata]))))
         
         if icon:
             for p in gdata:
