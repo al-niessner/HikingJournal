@@ -57,62 +57,113 @@ class Joined(hj.Map):
     def _oml(self): return [self._md[k] for k in sorted (self._md.keys())]
 
     def _bb(self)->None:
-        self._bb = [m.get_wgs84_bb() for m in self._oml()]
-        for r in range (1,self._tiles.shape[0]):
-            b0,b1 = [],[]
-            for c in range (self._tiles.shape[1]):
-                if -1 < self._tiles[r,c]:
-                    b0.extend ([corner (self._bb[self._tiles[r,c]],
-                                        hj.Map.Corner.NorthWest),
-                                corner (self._bb[self._tiles[r,c]],
-                                        hj.Map.Corner.NorthEast)])
-                else: b0.extend ([hj.Map.Point(numpy.nan, numpy.nan)])
-                if -1 < self._tiles[r-1,c]:
-                    b1.extend ([corner (self._bb[self._tiles[r-1,c]],
-                                        hj.Map.Corner.SouthWest),
-                                corner (self._bb[self._tiles[r-1,c]],
-                                        hj.Map.Corner.SouthEast)])
-                else: b1.extend ([hj.Map.Point(numpy.nan, numpy.nan)])
+        self._bb = [self._parallelagram (m.get_wgs84_bb()) for m in self._oml()]
+        for rc,i in filter (lambda e:-1 < e[1],
+                            numpy.ndenumerate (self._tiles)):
+            r,c = rc
+            nw = 0 < c and 0 < r and -1 < self._tiles[r-1,c-1]
+            nb = 0 < r and -1 < self._tiles[r-1,c]
+            ne = c+1 < self._tiles.shape[1] and 0 < r and \
+                 -1 < self._tiles[r-1,c+1]
+            eb = c+1 < self._tiles.shape[1] and -1 < self._tiles[r,c+1]
+            sb = r+1 < self._tiles.shape[0] and -1 < self._tiles[r+1,c]
+            se = c+1 < self._tiles.shape[1] and r+1 < self._tiles.shape[0] and \
+                 -1 < self._tiles[r+1,c+1]
+            wb = 0 < c and -1 < self._tiles[r,c-1]
+            sw = 0 < c and r+1 < self._tiles.shape[0] and \
+                 -1 < self._tiles[r+1,c-1]
+        
+            if any ([nw,nb,wb]):
+                cs = [corner (self._bb[self._tiles[r,c]],
+                              hj.Map.Corner.NorthWest)]
+                if nw: cs.append (corner (self._bb[self._tiles[r-1,c-1]]
+                                          , hj.Map.Corner.SouthEast))
+                if nb: cs.append (corner (self._bb[self._tiles[r-1,c]],
+                                          hj.Map.Corner.SouthWest))
+                if wb: cs.append (corner (self._bb[self._tiles[r,c-1]],
+                                          hj.Map.Corner.NorthEast))
+            
+                nc = hj.Map.Point(lat=numpy.mean ([p.lat for p in cs]),
+                                  lon=numpy.mean ([p.lon for p in cs]))
+            
+                self._replace (self._bb[self._tiles[r,c]], nc,
+                               hj.Map.Corner.NorthWest)
+                if nw: self._replace (self._bb[self._tiles[r-1,c-1]], nc,
+                                      hj.Map.Corner.SouthEast)
+                if nb: self._replace (self._bb[self._tiles[r-1,c]], nc,
+                                      hj.Map.Corner.SouthWest)
+                if wb: self._replace (self._bb[self._tiles[r,c-1]], nc,
+                                      hj.Map.Corner.NorthEast)
                 pass
-            b0 = [p for p in filter (lambda x:not numpy.isnan(x).any(), b0)]
-            b1 = [p for p in filter (lambda x:not numpy.isnan(x).any(), b1)]
-            lat = (min([p.lat for p in b0]) + max([p.lat for p in b1])) / 2.0
-            lon = [p.lon for p in b0] + [p.lon for p in b1]
-            edge = shapely.geometry.LineString([(min (lon)-.1,lat),
-                                                (max (lon)+.1,lat)])
-            for c in range (self._tiles.shape[1]):
-                if -1 < self._tiles[r-1,c]:
-                    self._replace (self._bb[self._tiles[r-1,c]], edge)
-                if -1 < self._tiles[r,c]:
-                    self._replace (self._bb[self._tiles[r,c]], edge)
-            pass
-        for c in range (1, self._tiles.shape[1]):
-            b0,b1 = [],[]
-            for r in range (self._tiles.shape[0]):
-                if -1 < self._tiles[r,c]:
-                    b0.extend ([corner (self._bb[self._tiles[r,c]],
-                                        hj.Map.Corner.NorthEast),
-                                corner (self._bb[self._tiles[r,c]],
-                                        hj.Map.Corner.SouthEast)])
-                else: b0.extend ([hj.Map.Point(numpy.nan, numpy.nan)])
-                if -1 < self._tiles[r,c-1]:
-                    b1.extend ([corner (self._bb[self._tiles[r,c-1]],
-                                        hj.Map.Corner.NorthWest),
-                                corner (self._bb[self._tiles[r,c-1]],
-                                        hj.Map.Corner.SouthWest)])
-                else: b1.extend ([hj.Map.Point(numpy.nan, numpy.nan)])
+        
+            if any ([ne,nb,eb]):
+                cs = [corner (self._bb[self._tiles[r,c]],
+                              hj.Map.Corner.NorthEast)]
+                if ne: cs.append (corner (self._bb[self._tiles[r-1,c+1]],
+                                          hj.Map.Corner.SouthWest))
+                if nb: cs.append (corner (self._bb[self._tiles[r-1,c]],
+                                          hj.Map.Corner.SouthEast))
+                if eb: cs.append (corner (self._bb[self._tiles[r,c+1]],
+                                          hj.Map.Corner.NorthWest))
+            
+                nc = hj.Map.Point(lat=numpy.mean ([p.lat for p in cs]),
+                                  lon=numpy.mean ([p.lon for p in cs]))
+            
+                self._replace (self._bb[self._tiles[r,c]], nc,
+                               hj.Map.Corner.NorthEast)
+                if ne: self._replace (self._bb[self._tiles[r-1,c+1]], nc,
+                                      hj.Map.Corner.SouthWest)
+                if nb: self._replace (self._bb[self._tiles[r-1,c]], nc,
+                                      hj.Map.Corner.SouthEast)
+                if eb: self._replace (self._bb[self._tiles[r,c+1]], nc,
+                                      hj.Map.Corner.NorthWest)
                 pass
-            b0 = [p for p in filter (lambda x:not numpy.isnan(x).any(), b0)]
-            b1 = [p for p in filter (lambda x:not numpy.isnan(x).any(), b1)]
-            lat = [p.lat for p in b0] + [p.lat for p in b1]
-            lon = (min([p.lon for p in b0]) + max([p.lon for p in b1])) / 2.0
-            edge = shapely.geometry.LineString([(lon, min (lat)-.1),
-                                                (lon, max (lat)+.1)])
-            for r in range (self._tiles.shape[0]):
-                if -1 < self._tiles[r,c-1]:
-                    self._replace (self._bb[self._tiles[r,c-1]], edge)
-                if -1 < self._tiles[r,c]:
-                    self._replace (self._bb[self._tiles[r,c]], edge)
+        
+            if any ([se,sb,eb]):
+                cs = [corner (self._bb[self._tiles[r,c]],
+                              hj.Map.Corner.SouthEast)]
+                if se: cs.append (corner (self._bb[self._tiles[r+1,c+1]],
+                                          hj.Map.Corner.NorthWest))
+                if sb: cs.append (corner (self._bb[self._tiles[r+1,c]],
+                                          hj.Map.Corner.NorthEast))
+                if eb: cs.append (corner (self._bb[self._tiles[r,c+1]],
+                                          hj.Map.Corner.SouthWest))
+            
+                nc = hj.Map.Point(lat=numpy.mean ([p.lat for p in cs]),
+                                  lon=numpy.mean ([p.lon for p in cs]))
+            
+                self._replace (self._bb[self._tiles[r,c]], nc,
+                               hj.Map.Corner.SouthEast)
+                if se: self._replace (self._bb[self._tiles[r+1,c+1]], nc,
+                                      hj.Map.Corner.NorthWest)
+                if sb: self._replace (self._bb[self._tiles[r+1,c]], nc,
+                                      hj.Map.Corner.NorthEast)
+                if eb: self._replace (self._bb[self._tiles[r,c+1]], nc,
+                                      hj.Map.Corner.SouthWest)
+                pass
+        
+            if any ([sw,sb,wb]):
+                cs = [corner (self._bb[self._tiles[r,c]],
+                              hj.Map.Corner.SouthWest)]
+                if sw: cs.append (corner (self._bb[self._tiles[r+1,c-1]],
+                                          hj.Map.Corner.NorthEast))
+                if sb: cs.append (corner (self._bb[self._tiles[r+1,c]],
+                                          hj.Map.Corner.NorthWest))
+                if wb: cs.append (corner (self._bb[self._tiles[r,c-1]],
+                                          hj.Map.Corner.SouthEast))
+            
+                nc = hj.Map.Point(lat=numpy.mean ([p.lat for p in cs]),
+                                  lon=numpy.mean ([p.lon for p in cs]))
+            
+                self._replace (self._bb[self._tiles[r,c]], nc,
+                               hj.Map.Corner.SouthWest)
+                if sw: self._replace (self._bb[self._tiles[r+1,c-1]], nc,
+                                      hj.Map.Corner.NorthEast)
+                if sb: self._replace (self._bb[self._tiles[r+1,c]], nc,
+                                      hj.Map.Corner.NorthWest)
+                if wb: self._replace (self._bb[self._tiles[r,c-1]], nc,
+                                      hj.Map.Corner.SouthEast)
+                pass
             pass
         return
 
@@ -134,9 +185,10 @@ class Joined(hj.Map):
     
     def _make_fm (self)->None:
         o = hj.Map.Pixel (0,0)
-        n = hj.Map.Pixel(None,None)
-        clipbox = [Clipbox(n,o,o,o,o) for m in self._oml()]
-        for rc,i in filter (lambda e:-1 < e[1], numpy.ndenumerate(self._tiles)):
+        clipbox = [Clipbox(hj.Map.Pixel(None,None),o,o,o,o)
+                   for m in self._oml()]
+        for rc,i in filter (lambda e:-1 < e[1],
+                            numpy.ndenumerate (self._tiles)):
             r,c = rc
             bb,cb,m = self._bb[i],clipbox[i],self._oml()[i]
             nb = 0 < r and -1 < self._tiles[r-1,c]
@@ -147,7 +199,6 @@ class Joined(hj.Map):
             nec = m.inverse (corner (bb, hj.Map.Corner.NorthEast))
             swc = m.inverse (corner (bb, hj.Map.Corner.SouthWest))
             sec = m.inverse (corner (bb, hj.Map.Corner.SouthEast))
-
             cb = cb._replace (nw=hj.Map.Pixel (col=0 if not wb else nwc.col,
                                                row=0 if not nb else nwc.row),
                               ne=hj.Map.Pixel (col=m.raw_shape().col-1 if not eb else nec.col,
@@ -156,55 +207,48 @@ class Joined(hj.Map):
                                                row=m.raw_shape().row-1 if not sb else swc.row),
                               se=hj.Map.Pixel (col=m.raw_shape().col-1 if not eb else sec.col,
                                                row=m.raw_shape().row-1 if not sb else sec.row))
-            
-            if r == 0 or c == 0: cb = cb._replace \
-               (offset=hj.Map.Pixel(col=0 if c == 0 else None,
-                                    row=0 if r == 0 else None))
+
+            if r == 0 or c == 0: cb = cb._replace (offset=hj.Map.Pixel(col=0 if c == 0 else None, row=0 if r == 0 else None))
             
             if nb and not wb:
-                swc = m.inverse (corner (self._bb[self._tiles[r-1,c]],
-                                         hj.Map.Corner.SouthWest))
+                swc = self._oml()[self._tiles[r-1,c]].inverse (corner (self._bb[self._tiles[r-1,c]], hj.Map.Corner.SouthWest))
                 ocb = clipbox[self._tiles[r-1,c]]
-                cb = cb._replace (offset=hj.Map.Pixel
-                                  (col=nwc.col - swc.col,
-                                   row=ocb.offset.row+(ocb.ne.row-ocb.nw.row)))
+                cb = cb._replace (offset=hj.Map.Pixel(col=swc.col - nwc.col,row=ocb.offset.row + (ocb.sw.row - ocb.nw.row)))
                 pass
         
             if wb and not nb:
-                nec = m.inverse (corner (self._bb[self._tiles[r,c-1]],
-                                         hj.Map.Corner.NorthEast))
+                nec = self._oml()[self._tiles[r,c-1]].inverse (corner (self._bb[self._tiles[r,c-1]], hj.Map.Corner.NorthEast))
                 ocb = clipbox[self._tiles[r,c-1]]
-                cb = cb._replace (offset=hj.Map.Pixel
-                                  (col=ocb.offset.col+(ocb.ne.col-ocb.nw.col),
-                                   row=nwc.row - nec.row))
+                cb = cb._replace (offset=hj.Map.Pixel(col=ocb.offset.col + (ocb.ne.col - ocb.nw.col),row=nec.row - nwc.row))
                 pass
 
             if wb and nb:
                 ncb = clipbox[self._tiles[r-1,c]]
                 wcb = clipbox[self._tiles[r,c-1]]
-                cb = cb._replace (offset=hj.Map.Pixel
-                                  (col=wcb.offset.col+(wcb.ne.col-wcb.nw.col),
-                                   row=ncb.offset.row+(ncb.sw.row-ncb.nw.row)))
-                
+                cb = cb._replace (offset=hj.Map.Pixel(col=wcb.offset.col + (wcb.ne.col - wcb.nw.col),row=ncb.offset.row + (ncb.sw.row - ncb.nw.row)))
+            
                 if ncb.offset.col is None:
-                    nwc = m.inverse (corner (self._bb[self._tiles[r-1,c]],
-                                             hj.Map.Corner.NorthWest))
-                    swc = m.inverse (corner (self._bb[self._tiles[r-1,c]],
-                                             hj.Map.Corner.SouthWest))
+                    nwc = self._oml()[self._tiles[r-1,c]].inverse (corner (self._bb[self._tiles[r-1,c]], hj.Map.Corner.NorthWest))
+                    swc = self._oml()[self._tiles[r-1,c]].inverse (corner (self._bb[self._tiles[r-1,c]], hj.Map.Corner.SouthWest))
                     clipbox[self._tiles[r-1,c]] = ncb._replace (offset=hj.Map.Pixel(col=cb.offset.col - (swc.col - nwc.col) - (nwc.col - ncb.nw.col), row=ncb.offset.row))
                     pass
-                
+
                 if wcb.offset.row is None:
-                    nec = m.inverse (corner (self._bb[self._tiles[r,c-1]],
-                                             hj.Map.Corner.NorthEast))
-                    nwc = m.inverse (corner (self._bb[self._tiles[r,c-1]],
-                                             hj.Map.Corner.NorthWest))
-                    clipbox[self._tiles[r,c-1]] = wcb._replace (offset=hj.Map.Pixel(col=wcb.offset.col, row=cb.offset.row - (nec.col - nwc.col) - (nwc.col - wcb.nw.col)))
+                    nec = self._oml()[self._tiles[r,c-1]].inverse (corner (self._bb[self._tiles[r,c-1]], hj.Map.Corner.NorthEast))
+                    nwc = self._oml()[self._tiles[r,c-1]].inverse (corner (self._bb[self._tiles[r,c-1]], hj.Map.Corner.NorthWest))
+                    clipbox[self._tiles[r,c-1]] = wcb._replace (offset=hj.Map.Pixel(col=wcb.offset.col, row=cb.offset.row - (nec.row - nwc.row) - (nwc.row - wcb.nw.row)))
                     pass
                 pass
         
             clipbox[i] = cb
             pass
+        cols,rows = [],[]
+        for cb in clipbox:
+            cols.append (cb.offset.col)
+            rows.append (cb.offset.row)
+            pass
+        mc,mr = min (cols),min (rows)
+        for i,cb in enumerate (clipbox): clipbox[i] = cb._replace(offset=hj.Map.Pixel(col=cb.offset.col - mc, row=cb.offset.row - mr))
         cols,rows = [],[]
         for c in range (self._tiles.shape[1]):
             cb = clipbox[self._tiles[-1,c]]
@@ -218,17 +262,18 @@ class Joined(hj.Map):
         self._fm = numpy.zeros ((max(rows)+1, max(cols)+1, 3),dtype=numpy.uint8)
         return
     
+    def _parallelagram (self, pts:[hj.Map.Point])->[hj.Map.Point]:
+        return [corner (pts, hj.Map.Corner.NorthWest),
+                corner (pts, hj.Map.Corner.NorthEast),
+                corner (pts, hj.Map.Corner.SouthEast),
+                corner (pts, hj.Map.Corner.SouthWest),
+                corner (pts, hj.Map.Corner.NorthWest)]
+
     def _replace (self, bb:[hj.Map.Point],
-                  edge:shapely.geometry.linestring.LineString)->None:
-        d = numpy.empty ((len (bb),))
-        nlr = shapely.geometry.LinearRing([(p.lon,p.lat) for p in bb])
-        for ip in nlr.intersection (edge):
-            d = [numpy.sqrt (numpy.square (ip.y - b.lat) +
-                             numpy.square (ip.x - b.lon)) for b in bb]
-            for idx in matplotlib.mlab.find (numpy.array(d) < 0.001):
-                bb[idx] = hj.Map.Point(lat=ip.y, lon=ip.x)
-                pass
-            pass
+                  nc:hj.Map.Point,
+                  which:hj.Map.Corner)->None:
+        bb[which.value + 1] = nc
+        if which == hj.Map.Corner.NorthWest: bb[0] = nc
         return
     
     def _segment (lp, p, fms, fp, fps):
