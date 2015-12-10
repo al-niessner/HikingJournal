@@ -3,6 +3,7 @@ import gpxpy
 import hj
 import hj.db
 import io
+import logging ; log = logging.getLogger(__name__)
 import os
 import osgeo.ogr
 
@@ -78,14 +79,16 @@ def trim (t:hj.GPSElement)->[hj.GPSElement]:
     
     if (8*3600 < max (dt) or 50e3 < max (dl)) and \
            dt.index (max (dt)) == dl.index (max (dl)):
-        print ('Trimming:', t.get_label())
+        log.warning ('Trimming: ' + t.get_label())
         idx = dt.index (max(dt)) + 1
 
         if 20 < idx: 
             result = trim (Element(t._name, pts[:idx], t._type, t._label)) + \
                      trim (Element(t._name, pts[idx:], t._type, t._label))
         else: result = trim (Element(t._name, pts[idx:], t._type, t._label))
-        print (len (result), [len (t.get_points()) for t in result])
+        log.info ('Number of segments: ' + str (len (result)))
+        log.info ('Length of segments: ' + str ([len (t.get_points())
+                                                 for t in result]))
         pass
     
     return result
