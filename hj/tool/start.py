@@ -36,7 +36,8 @@ if __name__ == '__main__':
     ap.add_argument ('-p', '--port', default=8080, type=int,
                      help='the socket port number for browser <-> journal communications [%(default)s]')
     args = ap.parse_args()
-    logging.basicConfig (filename=os.path.expanduser
+    logging.basicConfig (filemode='w',
+                         filename=os.path.expanduser
                          (os.path.expandvars (args.log_file)),
                          level=args.log_level)
     hj.tool.start.main (args.config_file, args.port)
