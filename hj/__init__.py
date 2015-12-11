@@ -4,66 +4,54 @@ import enum
 import numpy
 
 class Annotated(object):
-    def __init__(self, track:'GPSElement', maps:'[Map]'=[],
-                 photos:'[Photo]'=[], waypts:'[GPSElement]'=[]):
+    def __init__(self, tid:str, mid:str=None, pids:[str]=[], wids:[str]=[]):
         object.__init__(self)
-        self.__maps = [m.fingerprint() for m in maps]
-        self.__photos = [p.fingerprint() for p in photos]
-        self.__track = track.fingerprint()
-        self.__waypts = [w.fingerprint() for w in waypts]
+        import hj.db
+
+        self.__fp = hj.db._id (('Annotated Track: ' + tid[0]).encode()) 
+        self.__map = mid
+        self.__photos = pids
+        self.__track = tid[0]
+        self.__waypts = wids
         return
 
     def get_fingerprint (self)->str:
         '''An identifier that is immutable but unique'''
-        return self.__track
+        return self.__fp
 
     def get_track_fingerprint (self): return self.__track
     def get_track (self):
         import hj.db
-        result = [t.fingerprint() == self.__track
-                  for t in hj.db.filter (hj.db.EntryType.track)]
-        return result[0]
+        return hj.db.fetch (self.__track)[self.__track]
 
-    def get_map_fingerprints (self)->[str]: return self.__maps
-    def get_maps (self)->'[Map]':
-        import hj.db
-        result = []
-        for m in hj.db.filter (hj.db.EntryType.map):
-            if 0 < self.__maps.count (m.fingerprint()): result.append (m)
-            pass
-        return result
+    def get_map_fingerprint (self)->[str]: return self.__map
+    def get_maps (self)->'Map':
+        import hj.util.geo
+        return hj.util.geo.Joined(fp=self.__map)
     
     def get_photo_fingerprints (self)->[str]: return self.__photos
     def get_photos (self)->'[Photo]':
         import hj.db
-        result = []
-        for p in hj.db.filter (hj.db.EntryType.photo):
-            if 0 < self.__photos.count (p.fingerprint()): result.append (p)
-            pass
-        return result
+        return [p for p in hj.db.fetch (self.__photos).values()]
 
     def get_waypoint_fingerprints (self)->[str]: return self.__waypts
     def get_waypoints (self)->'[GPSElement]':
         import hj.db
-        result = []
-        for w in hj.db.filter (hj.db.EntryType.waypt):
-            if 0 < self.__waypts.count (w.fingerprint()): result.append (w)
-            pass
-        return result
+        return [w for w in hj.db.fetch (self.__waypts).values()]
 
-    def set_maps (self, maps:'[Map]')->None:
-        '''Set, potentially updating, the maps annotating the related track'''
-        self.__maps = [m.fingerprint() for m in maps]
+    def set_map (self, mid:str)->None:
+        '''Set, potentially updating, the map annotating the related track'''
+        self.__map = mid
         return
     
-    def set_photos (self, photos:'[Photo]')->None:
+    def set_photos (self, pids:[str])->None:
         '''Set, potentially updating, the photos annotating the related track'''
-        self.__photos = [p.fingerprint() for p in photos]
+        self.__photos = pids
         return
 
-    def set_waypoints (self, waypts:'[GPSElement]')->None:
+    def set_waypoints (self, wids:[str])->None:
         '''Set, potentially updating, the waypoints annotating the related track'''
-        self.__waypts = [w.fingerprint() for w in waypts]
+        self.__waypts = wids
         return    
     pass
 

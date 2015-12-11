@@ -13,8 +13,18 @@ import os
 import subprocess
 import tempfile
 
+@fapp.route ('/metadata/assign', methods=['PUT'])
+def assign()->bytes:
+    kwds = dict([(k, flask.request.args.get (k))
+                 for k in flask.request.args.keys()]) # flask thing
+    for k in filter (lambda k:k.endswith ('ids'),
+                     kwds.keys()): kwds[k] = kwds[k].split (':')
+    a = hj.Annotated(**kwds)
+    hj.db.archive (hj.db.EntryType.annot, a, a.get_fingerprint())
+    return b''
+
 @fapp.route ('/metadata/collate', methods=['GET'])
-def collate ()->bytes:
+def collate()->bytes:
     content = {'map':{}, 'wids':[]}
     tid = flask.request.args.get ('tid')
     t = hj.db.fetch ([tid])[tid]

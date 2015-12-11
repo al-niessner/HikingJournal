@@ -5,6 +5,52 @@ var metadata_is_initializing = false;
 var metadata_tl = [];
 var metadata_wl = [];
 
+function metadata_assign()
+{
+    var connection = new XMLHttpRequest();
+    var maps = document.getElementById ("stiched_maps");
+    var params = "";
+    var selp = document.getElementById ("photo_list");
+    var selt = document.getElementById ("track_list");
+    var selw = document.getElementById ("waypt_list");
+
+    connection.onreadystatechange = function()
+    {
+        if (connection.readyState == 4 && connection.status == 200)
+        {
+            metadata_free();
+        }
+    }
+    params += "tid=" + selt.value;
+    
+    if (maps === null) {}
+    else {params += "&mid=" + maps.name;}
+
+    if (0 < selp.selectedOptions.length)
+    {
+        params += "&pids="
+        for (p = 0 ; p < selp.selectedOptions.length ; p++)
+        {
+            params += selp.selectedOptions[p].id;
+            if (p < selp.selectedOptions.length-1) params += ':';
+        }
+    }
+
+    if (0 < selw.selectedOptions.length)
+    {
+        params += "&wids="
+        for (w = 0 ; w < selw.selectedOptions.length ; w++)
+        {
+            params += selw.selectedOptions[w].id;
+            if (w <  selw.selectedOptions.length-1) params += ":";
+        }
+    }
+
+    metadata_busy(1);
+    connection.open("PUT", "/metadata/assign?" + params, true);
+    connection.send();
+}
+
 function metadata_busy (expected)
 {
     metadata_count = 0;
@@ -92,6 +138,7 @@ function metadata_load (lname, nname)
 
 function metadata_selt()
 {
+    var done = document.getElementById ("done_button");
     var map = document.getElementById ("map");
     var selp = document.getElementById ("photo_list");
     var selt = document.getElementById ("track_list");
@@ -99,7 +146,8 @@ function metadata_selt()
 
     if (selt.value === "reset")
     {
-        document.getElementById ("map").innerHTML = "";
+        done.setAttribute ("disabled","");
+        map.innerHTML = "";
         selw.setAttribute ("disabled","");
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {selw.selectedOptions[w].selected = false;}
@@ -113,13 +161,12 @@ function metadata_selt()
             {
                 var data = JSON.parse (connection.responseText);
 
-                console.log (data)
                 for (w = 0 ; w < data.wids.length ; w++)
                 {document.getElementById (data.wids[w]).selected = true;}
 
                 if ('name' in data.map)
                 {
-                    map.innerHTML = '<img alt="USGS Map" class="display" src="/metadata/load' + data.map.name + '"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>';
+                    map.innerHTML = '<img alt="USGS Map" class="display" id="stiched_maps" name="' + data.map.fingerprint + '" src="/metadata/load' + data.map.name + '"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>';
                 }
                 else
                 {
@@ -137,12 +184,13 @@ function metadata_selt()
                         map.innerHTML = clist;
                     }
                 }
+                done.removeAttribute ("disabled");
+                selw.removeAttribute ("disabled");
                 metadata_free();
             }
         }
 
         metadata_busy(1);
-        selw.removeAttribute ("disabled");
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {selw.selectedOptions[w].selected = false;}
         connection.open("GET", "/metadata/collate?tid=" + selt.value, true);

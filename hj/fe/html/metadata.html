@@ -20,37 +20,34 @@
         <!-- see http://www.w3schools.com/html/html_images.asp and use <map> -->
       </div>
       <div id="tracks">
-        <form>
-          <label for="track_list">Tracks:</label><br/>
-          <select id="track_list" name="track_list" onchange="metadata_selt();">
-            <option disabled>barren</option>
-            <option>a</option>
-            <option>b</option>
-            <option disabled>annotated</option>
-            <option>e</option>
-            <option>f</option>
-          </select>
-        </form>
+        <label for="track_list">Tracks:</label><br/>
+        <select id="track_list" name="track_list" onchange="metadata_selt();">
+          <option disabled>barren</option>
+          <option>a</option>
+          <option>b</option>
+          <option disabled>annotated</option>
+          <option>e</option>
+          <option>f</option>
+        </select>
       </div>
       <div id="waypts">
-        <form>
-          <label for="waypt_list">Waypoints:</label><br/>
-          <select id="waypt_list" multiple="multiple" name="waypt_list">
-            <option>c</option>
-            <option>d</option>
-          </select>
-        </form>
+        <label for="waypt_list">Waypoints:</label><br/>
+        <select id="waypt_list" multiple="multiple" name="waypt_list">
+          <option>c</option>
+          <option>d</option>
+        </select>
       </div>
       <div id="photos">
-        <form>
-          <label for="photo_list">Photos:</label><br/>
-          <select id="photo_list" multiple="multiple" name="photo_list">
-            <option>g</option>
-            <option>h</option>
-          </select>
-        </form>
+        <label for="photo_list">Photos:</label><br/>
+        <select id="photo_list" multiple="multiple" name="photo_list">
+          <option>g</option>
+          <option>h</option>
+        </select>
       </div>
       <div id="status"></div>
+      <div id="assign">
+        <button disabled id="done_button" onclick="metadata_assign();">Record Annotations</button>
+      </div>
       <div id="update">
         <form>
           <fieldset>
