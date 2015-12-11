@@ -38,21 +38,6 @@ class Annotated(object):
     def get_waypoints (self)->'[GPSElement]':
         import hj.db
         return [w for w in hj.db.fetch (self.__waypts).values()]
-
-    def set_map (self, mid:str)->None:
-        '''Set, potentially updating, the map annotating the related track'''
-        self.__map = mid
-        return
-    
-    def set_photos (self, pids:[str])->None:
-        '''Set, potentially updating, the photos annotating the related track'''
-        self.__photos = pids
-        return
-
-    def set_waypoints (self, wids:[str])->None:
-        '''Set, potentially updating, the waypoints annotating the related track'''
-        self.__waypts = wids
-        return    
     pass
 
 class GPSElement(object):

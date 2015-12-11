@@ -55,21 +55,22 @@ Blend text, notes, voice, gpx, and USGS quads to make an entry in the journal
     - value is the type of data contained in the md5 checksum
     - data is stored in **wdir** from the config file
 - [ ] manage metadata
-  - [ ] ideal workflow step 2
-    - [ ] find Quad map(s) associated with a route, track, or waypoint
+  - [x] ideal workflow step 2
+    - [x] find Quad map(s) associated with a route, track, or waypoint
       - [x] search local db for map
-      - [ ] search usgs for map
+      - [x] search usgs for map *can only do this manually*
     - [x] find waypoints that go along with track
       - [x] manually remove them
       - [x] manually add them
       * Note: because it takes so long to generate the map, it will not be updated when the waypoint list changes
     - [x] change descriptions and labels for all data involved (reuse import.js?)
+  - [ ] be able to click on map and get to gps info rather than successor/previous
   - [ ] ideal workflow step 3
     - [ ] add pictures from file system : in-place reference?
     - [ ] correlate pictures with tracks via time
-  - [ ] bind all metadata into a "leg" for scribing an entry
+  - [x] bind all metadata annotations for scribing an entry
 - [ ] ideal workflow step 4
-  - [x] define: an entry is one or more legs that make up a journey.
+  - [x] define: an entry is one or more annotated tracks that make up a journey.
   - [ ] define the language to scribe in
     - [ ] markdown? *markdown seems more popular than XML*
     - [x] yet another markdown? *hijack markdown with CSS*
