@@ -11,7 +11,7 @@ class Annotated(object):
         self.__fp = hj.db._id (('Annotated Track: ' + tid[0]).encode()) 
         self.__map = mid
         self.__photos = pids
-        self.__track = tid[0]
+        self.__track = tid
         self.__waypts = wids
         return
 
