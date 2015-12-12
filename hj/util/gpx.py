@@ -77,10 +77,9 @@ def trim (t:hj.GPSElement)->[hj.GPSElement]:
         dt.append ((pts[i+1].time - p.time).total_seconds())
         pass
     
-    if (8*3600 < max (dt) or 50e3 < max (dl)) and \
-           dt.index (max (dt)) == dl.index (max (dl)):
+    if 8*3600 < max (dt) or 50e3 < max (dl):
         log.warning ('Trimming: ' + t.get_label())
-        idx = dt.index (max(dt)) + 1
+        idx = min ([dt.index (max (dt)), dl.index (max (dl))]) + 1
 
         if 20 < idx: 
             result = trim (Element(t._name, pts[:idx], t._type, t._label)) + \
