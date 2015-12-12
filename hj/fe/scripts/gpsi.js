@@ -75,3 +75,32 @@ function gpsi_record()
     data.label = label.value;
     data.description = description.value;
 }
+
+function gpsi_skip_to (id)
+{
+    var data;
+    for (i = 0 ; i < (gpsi_content.routes.length + gpsi_content.tracks.length +
+                      gpsi_content.waypts.length) ; i++)
+    {
+        if (gpsi_content.routes.length + gpsi_content.tracks.length - 1 < i)
+        {
+            data = gpsi_content.waypts[i - gpsi_content.routes.length - gpsi_content.tracks.length];
+        }
+        else
+        {
+            if (gpsi_content.routes.length - 1 < i)
+            {
+                data = gpsi_content.tracks[i - gpsi_content.routes.length];
+            }
+            else { data = gpsi_content.routes[i]; }
+        }
+
+        if (data.fingerprint === id)
+        {
+            gpsi_index = i;
+            gpsi_advance (0);
+            i = (gpsi_content.routes.length + gpsi_content.tracks.length +
+                 gpsi_content.waypts.length) + 1;
+        }
+    }
+}

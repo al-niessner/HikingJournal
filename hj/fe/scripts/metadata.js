@@ -163,6 +163,8 @@ function metadata_selt()
 
                 for (w = 0 ; w < data.wids.length ; w++)
                 {document.getElementById (data.wids[w]).selected = true;}
+                gpsi_record();
+                gpsi_skip_to (selt.value);
 
                 if ('name' in data.map)
                 {
