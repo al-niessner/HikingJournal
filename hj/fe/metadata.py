@@ -8,6 +8,7 @@ import hj.config
 import hj.db
 import hj.util.geo
 import json
+import logging; log = logging.getLogger(__name__)
 import matplotlib.image
 import os
 import subprocess
@@ -38,9 +39,9 @@ def collate()->bytes:
     m = None if len (ml) == 0 else  hj.util.geo.Joined (ml=ml)
 
     if m is None or not m.all (t.get_points()):
-        print ('Need to get some bloody maps from USGS!!!!!')
-        print ('  track: ' + t.get_label())
-        print ('  first: ' + str(t.get_points()[0].lat) + ' ' + str(t.get_points()[0].lon))
+        log.error ('Need to get some bloody maps from USGS!!!!!')
+        log.error ('  track: ' + t.get_label())
+        log.error ('  first: ' + str(t.get_points()[0].lat) + ' ' + str(t.get_points()[0].lon))
     else: # else should not be here when can autoload the maps
         m.overlay (t.get_points())
         coords = [] if len (content['wids']) == 0 else m.overlay \
