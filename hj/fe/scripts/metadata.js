@@ -168,7 +168,23 @@ function metadata_selt()
 
                 if ('name' in data.map)
                 {
-                    map.innerHTML = '<img alt="USGS Map" class="display" id="stiched_maps" name="' + data.map.fingerprint + '" src="/metadata/load' + data.map.name + '"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>';
+                    // Seems that <map> does not handle images being scaled
+                    // very gracefully. Need to find another solution...
+                    var cmap = '<map name="USGS_WAYPTS">';
+
+                    for (w = 0 ; w < data.map.waypts.length ; w++)
+                    {
+                        cmap += '<area title="WayPoint" shape="circle" coords="';
+                        cmap += data.map.waypts[w][1];
+                        cmap += ',';
+                        cmap += data.map.waypts[w][0];
+                        cmap += ',100" onclick="gpsi_skip_to (\'';
+                        cmap += data.wids[w];
+                        cmap += '\');">';
+                    } 
+                    cmap += '</map>';
+                    map.innerHTML = '<img alt="USGS Map" class="display" id="stiched_maps" name="' + data.map.fingerprint + '" src="/metadata/load' + data.map.name + '" usemap="#USGS_WAYPTS"/><button id="external_viewer" name="' + data.map.name + '" onclick="metadata_spawn();" type="button">External Viewer</button>' + cmap;
+                    console.log (map.innerHTML);
                 }
                 else
                 {
