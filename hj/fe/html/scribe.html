@@ -1,0 +1,47 @@
+<!DOCTYPE html> 
+<html>
+  <head>
+    <script src="/scripts/gpsi.js"></script>
+    <script src="/scripts/scribe.js"></script>
+    <style>
+      #tracks { border:0px; margin:2%; padding:0%; width:24%; }
+      #waypts { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
+      #photos { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
+      #map { border:0px; float:right; height:80%; margin:2%; padding:0%; width:68% }
+      #status {}
+      #update { border:10px; clear:both; margin:1%; padding:0%; width:100%; }
+      img { height:auto; width:100%; }
+    </style>
+    <title>Scribe a Story About Annotated Tracks</title>
+  </head> 
+  <body onload="scribe_init();">
+    <div hidden id="new_form">
+      <label>Label:</label>
+      <input id="entry_label" onchange="scribe_new (true);"
+             style="margin-right:10%; margin-left:1%;" 
+             size="80%" type="text" value="">
+      <br/>
+      <label for="annot_list">Annotations:</label>
+      <select id="annot_list" multiple="multiple" name="annot_list" onclick="scribe_new (true);">
+        <option>c</option>
+        <option>d</option>
+        <option>e</option>
+      </select>
+      <br/>
+      <button disabled id="annot_record" onclick="scribe_record();">Record</button>
+      <button onclick="scribe_cancel();">Cancel</button>
+    </div>
+    <div id="workbench">
+      <div id="entries">
+        <label for="entry_list">Entry: </label>
+        <button onclick="scribe_new (false);">New</button><br/>
+        <select id="entry_list" name="entry_list" onchange="scribe_sels();">
+          <option>-- RESET --</option>
+          <option>a</option>
+          <option>b</option>
+        </select>
+      </div>
+    </div>
+    <div hidden id="waiting"><h1>Busy Working...</h1></div>
+  </body>
+</html> 

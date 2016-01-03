@@ -17,6 +17,9 @@ def input_dev() -> bytes: return hj.fe._static ('/scripts/input_dev.js')
 @fapp.route ('/scripts/metadata.js')
 def metadata_js() -> bytes: return hj.fe._static ('/scripts/metadata.js')
 
+@fapp.route ('/scripts/scribe.js')
+def scribe_js() -> bytes: return hj.fe._static ('/scripts/scribe.js')
+
 @fapp.route ('/scripts/viewport.js')
 def viewport_js() -> bytes: return hj.fe._static ('/scripts/viewport.js')
 
