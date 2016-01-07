@@ -32,14 +32,14 @@
       <button onclick="scribe_cancel();">Cancel</button>
     </div>
     <div id="workbench">
+      <label for="entry_list">Entry: </label>
+      <button onclick="scribe_new (false);">New</button><br/>
+      <select id="entry_list" name="entry_list" onchange="scribe_sels();">
+        <option>-- RESET --</option>
+        <option>a</option>
+        <option>b</option>
+      </select>
       <div id="entries">
-        <label for="entry_list">Entry: </label>
-        <button onclick="scribe_new (false);">New</button><br/>
-        <select id="entry_list" name="entry_list" onchange="scribe_sels();">
-          <option>-- RESET --</option>
-          <option>a</option>
-          <option>b</option>
-        </select>
       </div>
     </div>
     <div hidden id="waiting"><h1>Busy Working...</h1></div>

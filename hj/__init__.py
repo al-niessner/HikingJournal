@@ -8,7 +8,7 @@ class Annotated(object):
         object.__init__(self)
         import hj.db
 
-        self.__fp = hj.db._id (('Annotated Track: ' + tid[0]).encode()) 
+        self.__fp = hj.db._id (('Annotated Track: ' + tid).encode()) 
         self.__map = mid
         self.__photos = pids
         self.__track = tid
@@ -22,7 +22,7 @@ class Annotated(object):
     def get_track_fingerprint (self): return self.__track
     def get_track (self):
         import hj.db
-        return hj.db.fetch (self.__track)[self.__track]
+        return hj.db.fetch ([self.__track])[self.__track]
 
     def get_map_fingerprint (self)->[str]: return self.__map
     def get_maps (self)->'Map':
@@ -38,6 +38,30 @@ class Annotated(object):
     def get_waypoints (self)->'[GPSElement]':
         import hj.db
         return [w for w in hj.db.fetch (self.__waypts).values()]
+    pass
+
+class Entry(object):
+    def __init__ (self, aids:[str], label:str):
+        object.__init__(self)
+        import hj.db
+
+        self.__aids = aids
+        self.__fp = hj.db._id (('Annotations: ' + '.'.join (aids)).encode())
+        self.__label = label
+        return
+
+    def get_fingerprint (self)->str:
+        '''An identifier that is immutable but unique'''
+        return self.__fp
+
+    def get_label (self)->str:
+        '''User provided and mutable short text description'''
+        return self.__label
+    
+    def set_label (self, label:str)->None:
+        '''Set, potentially updating, the label of this element'''
+        self.__label = label
+        return
     pass
 
 class GPSElement(object):

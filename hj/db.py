@@ -62,6 +62,10 @@ def archive (typ:EntryType, item, id:str=None):
     insert (typ, id)
     return id
 
+def contains (id:str)->bool:
+    with _open() as db: result = id in db
+    return result
+
 def fetch (ids:[str])->{str:object}:
     '''Fetch particular items from the db and return it in a dictionary using same fps as the keys'''
     result = {}

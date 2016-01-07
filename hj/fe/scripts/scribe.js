@@ -1,4 +1,4 @@
-function scribe_cancel ()
+function scribe_cancel()
 {
     var sela = document.getElementById ("annot_list");
 
@@ -12,6 +12,36 @@ function scribe_cancel ()
 
 function scribe_init()
 {
+    var connection = new XMLHttpRequest();
+
+    document.getElementById ("workbench").setAttribute ("hidden", "");
+    document.getElementById ("waiting").removeAttribute ("hidden");
+    connection.onreadystatechange = function()
+    {
+        if (connection.readyState == 4 && connection.status == 200)
+        {
+            var data = JSON.parse (connection.responseText);
+            var ih = '';
+
+            for (a = 0 ; a < data.annots.length ; a++)
+            {
+                ih += '<option name="' + data.annots[a].fingerprint;
+                ih += '">' + data.annots[a].label + '</option>';
+            }
+            document.getElementById ("annot_list").innerHTML = ih;
+            ih = '<option name="__reset__">-- RESET --</option>';
+            for (e = 0 ; e < data.entries.length ; e++)
+            { 
+                ih += '<option name="' + data.entries[e].fingerprint;
+                ih += '">' + data.entries[e].label + '</option>';
+            }
+            document.getElementById ("entry_list").innerHTML = ih;
+            document.getElementById ("waiting").setAttribute ("hidden", "");
+            document.getElementById ("workbench").removeAttribute ("hidden");
+        }
+    }
+    connection.open("GET", "/scribe/a_and_e", true);
+    connection.send();
 }
 
 function scribe_new (update)
@@ -29,9 +59,34 @@ function scribe_new (update)
     }
 }
 
-function scribe_record ()
+function scribe_record()
 {
-    console.log ('record new entry');
+    var connection = new XMLHttpRequest();
+    var params = 'label=' + document.getElementById ('entry_label').value;
+    var sela = document.getElementById ("annot_list");
+
+    document.getElementById ("new_form").setAttribute ("hidden", "");
+    document.getElementById ("waiting").removeAttribute ("hidden");
+    params += '&aids=';
+    for (a = 0 ; a < sela.selectedOptions.length-1 ; a++)
+    { params += sela.selectedOptions[a].name + ','; }
+    params += sela.selectedOptions[sela.selectedOptions.length-1].name;
+    connection.onreadystatechange = function()
+    {
+        if (connection.readyState == 4 && connection.status == 200)
+        {
+            var data = JSON.parse (connection.responseText);
+
+            // FIXME: loop through the options
+            //   option.name == fingerprint, then all good
+            //   above is never true, append new option
+            document.getElementById ("waiting").setAttribute ("hidden", "");
+            scribe_cancel();
+            document.getElementById ("workbench").removeAttribute ("hidden");
+        }
+    }
+    connection.open("PUT", "/scribe/new?" + params, true);
+    connection.send();
 }
 
 function scribe_sels()
