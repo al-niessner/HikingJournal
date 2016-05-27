@@ -106,18 +106,19 @@ function metadata_load (lname, nname)
 
             if (lname === "track_list")
             {
-                opts += '<option value="reset">-- RESET --</option><option disabled>forsaken</option>'
+                opts += '<option value="reset">-- RESET --</option><optgroup label="forsaken">'
                 for (i = 0 ; i < data.barren.length ; i++)
                 {
                     metadata_tl.push (data.barren[i]);
                     opts += '<option id="' + data.barren[i].fingerprint + '" value="' + data.barren[i].fingerprint + '">' + data.barren[i].label + '</option>';
                 }
-                opts += '<option disabled>annotated</option>'
+                opts += '</optgroup><optgroup label="annotated">';
                 for (i = 0 ; i < data.annotated.length ; i++)
                 {
                     metadata_tl.push (data.annotated[i]);
                     opts += '<option id="' + data.annotated[i].fingerprint+ '" value="' + data.annotated[i].fingerprint + '">' + data.annotated[i].label + '</option>';
                 }
+                opts += '</optgroup>';
             }
             else
             {

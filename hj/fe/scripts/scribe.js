@@ -69,8 +69,8 @@ function scribe_record()
     document.getElementById ("waiting").removeAttribute ("hidden");
     params += '&aids=';
     for (a = 0 ; a < sela.selectedOptions.length-1 ; a++)
-    { params += sela.selectedOptions[a].name + ','; }
-    params += sela.selectedOptions[sela.selectedOptions.length-1].name;
+    { params += sela.selectedOptions[a].getAttribute ("name") + ','; }
+     params += sela.selectedOptions[sela.selectedOptions.length-1].getAttribute ("name");
     connection.onreadystatechange = function()
     {
         if (connection.readyState == 4 && connection.status == 200)
@@ -81,8 +81,8 @@ function scribe_record()
             //   option.name == fingerprint, then all good
             //   above is never true, append new option
             document.getElementById ("waiting").setAttribute ("hidden", "");
-            scribe_cancel();
             document.getElementById ("workbench").removeAttribute ("hidden");
+            scribe_init();
         }
     }
     connection.open("PUT", "/scribe/new?" + params, true);
