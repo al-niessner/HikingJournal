@@ -1,5 +1,6 @@
 
 import collections
+import datetime
 import enum
 import numpy
 
@@ -44,12 +45,38 @@ class Entry(object):
     def __init__ (self, aids:[str], label:str):
         object.__init__(self)
         import hj.db
-
+        
         self.__aids = aids
         self.__fp = hj.db._id (('Annotations: ' + '.'.join (aids)).encode())
         self.__label = label
+        self.__modified = datetime.datetime.utcnow();
+        self.__segment = dict([(aid,'') for aid in self.__aids])
         return
 
+    def _segment (self, a):
+        import hj.db
+        
+        t = hj.db.fetch ([a])[a].get_track()
+        e = [p.elev for p in t.get_points()]
+        gain = numpy.diff (e)
+        gain = gain[0 < gain].sum()
+        distance = 0
+        trailend = 'N {1}  W {2}  ev {0}'.format (*t.get_points()[-1])
+        trailhead = 'N {1}  W {2}  ev {0}'.format (*t.get_points()[0])
+        return {'change':e[-1] - e[0],
+                'gain':gain,
+                'id':a,
+                'len':distance,
+                'te':trailend, 'th':trailhead,
+                'text':self.__segment[a],
+                'tid':t.get_fingerprint()}
+    
+    def as_dict(self)->{}:
+        return {'label':self.get_label(),
+                'nsegs':len (self.__aids),
+                'mdate':self.__modified.strftime('%Y-%m-%d %H:%M'),
+                'segs':[self._segment (a) for a in self.__aids]}
+    
     def get_fingerprint (self)->str:
         '''An identifier that is immutable but unique'''
         return self.__fp
@@ -57,10 +84,39 @@ class Entry(object):
     def get_label (self)->str:
         '''User provided and mutable short text description'''
         return self.__label
+
+    def get_points (self):
+        import hj.db
+        
+        pts = []
+        for a in self.__aids: pts.extend (hj.db.fetch
+                                          ([a])[a].get_track().get_points())
+        return pts
+                                          
+    def get_segment (self, aid:str=None)->str:
+        if len(self.__aids) == 1 and aid is None: aid = self.__aids[0]
+        if aid is None:
+            raise AttributeError('aid must be defined if more than one segment')
+        return self.__segment[aid]
     
     def set_label (self, label:str)->None:
         '''Set, potentially updating, the label of this element'''
         self.__label = label
+        return
+
+    def set_segment (self, text, aid:str=None)->None:
+        if len(self.__aids) == 1 and aid is None: aid = self.__aids[0]
+        if aid is None:
+            raise AttributeError('aid must be defined if more than one segment')
+
+        if text != self.__segment[aid]:
+            self.__modified = datetime.datetime.utcnow()
+            self.__segment[aid] = text
+            pass
+        return
+    
+    def update (self, d:{})->None:
+        for a,i in d.items(): self.__set_segment (i['text'],a)
         return
     pass
 

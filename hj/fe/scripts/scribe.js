@@ -10,6 +10,29 @@ function scribe_cancel()
     document.getElementById ("workbench").removeAttribute ("hidden");
 }
 
+function scribe_fill (entry)
+{
+    var form = document.getElementById ("entry_form");
+
+    f = '<form><fieldset><legend>Title</legend><table>';
+    f += '<tr><td align="right">Entry Label : </td><td>second test</td></tr>';
+    f += '<tr><td align="right">Segment Number : </td><td>7 of 12</td></tr>';
+    f += '<tr><td align="right">Modified Date : </td><td>Yesterday</td></tr>';
+    f += '</table></fieldset></form><form><fieldset><legend>Segment</legend>';
+    f += '<form><fieldset><legend>Prologue</legend>'
+    f += '<label>Date</label>';
+    f += '<br><label>Trailhead</label>';
+    f += '<br><label>Trailend</label>';
+    f += '<br><label>Distance</label>';
+    f += '<br><label>Elevation Change</label>';
+    f += '<br><label>Elevation Gain</label>';
+    f += '</fieldset></form><textarea></textarea><form><fieldset><legend>Actions</legend>';
+    f += '<button>Previous</button><button>Successor</button>';
+    f += '<button style="margin-left:75px;">Save</button>';
+    f += '</fieldset></form></fieldset></form>';
+    form.innerHTML = f;
+}
+
 function scribe_init()
 {
     var connection = new XMLHttpRequest();
@@ -77,9 +100,6 @@ function scribe_record()
         {
             var data = JSON.parse (connection.responseText);
 
-            // FIXME: loop through the options
-            //   option.name == fingerprint, then all good
-            //   above is never true, append new option
             document.getElementById ("waiting").setAttribute ("hidden", "");
             document.getElementById ("workbench").removeAttribute ("hidden");
             scribe_init();
@@ -91,5 +111,22 @@ function scribe_record()
 
 function scribe_sels()
 {
-    console.log ('new selection');
+    var eid = document.getElementById ("entry_list").selectedOptions[0].getAttribute("name");
+    var form = document.getElementById ("entry_form");
+    
+    if (eid === "__reset__") {  form.innerHTML = ""; }
+    else
+    {
+        var connection = new XMLHttpRequest();
+        var params = "eid=" + eid;
+        
+        form.innerHTML = "<h3>Loading Data...</h3>";
+        connection.onreadystatechange = function()
+        {
+            if (connection.readyState == 4 && connection.status == 200)
+            { scribe_fill (JSON.parse (connection.responseText)); }
+        }
+        connection.open("GET", "/scribe/load?" + params, true);
+        connection.send();
+    }
 }

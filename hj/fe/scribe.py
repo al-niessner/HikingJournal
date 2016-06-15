@@ -24,11 +24,16 @@ def a_and_e()->bytes:
                                 key=lambda e:e['label'])}
     return json.dumps (content).encode()
 
+@fapp.route ('/scribe/load', methods=['GET'])
+def scribe_load()->bytes:
+    eid = flask.request.args.get ('eid')
+    return json.dumps (hj.db.fetch ([eid])[eid].as_dict())
+
 @fapp.route ('/scribe/new', methods=['PUT'])
 def scribe_new()->bytes:
     ne = hj.Entry(flask.request.args.get ('aids').split (',')
                   if 0 < flask.request.args.get ('aids').find (',') else
-                  flask.request.args.get ('aids'),
+                  [flask.request.args.get ('aids')],
                   flask.request.args.get ('label'))
 
     if not hj.db.contains (ne.get_fingerprint()):
@@ -37,3 +42,11 @@ def scribe_new()->bytes:
     
     return json.dumps ({'fingerprint':ne.get_fingerprint(),
                         'label':ne.get_label()}).encode()
+
+@fapp.route ('/scribe/save', methods=['PUT'])
+def scribe_save()->bytes:
+    eid = flask.request.args.get ('eid')
+    entry = hj.db.fetch ([eid])[eid]
+    entry.update (scribble)
+    hj.db.archive (hj.db.EntryType.entry, entry, eid)
+    return b''
