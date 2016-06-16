@@ -55,24 +55,35 @@ class Entry(object):
 
     def _segment (self, a):
         import hj.db
-        
+
         t = hj.db.fetch ([a])[a].get_track()
         e = [p.elev for p in t.get_points()]
+        tim = t.get_points()[0].time
         gain = numpy.diff (e)
-        gain = gain[0 < gain].sum()
-        distance = 0
-        trailend = 'N {1}  W {2}  ev {0}'.format (*t.get_points()[-1])
-        trailhead = 'N {1}  W {2}  ev {0}'.format (*t.get_points()[0])
-        return {'change':e[-1] - e[0],
+        gain = round (gain[0 < gain].sum())
+        delta = distance = 'undefined'
+        trailend = 'N {1}  W {2}  ev {0:4.0f}'.format (*t.get_points()[-1])
+        trailhead = 'N {1}  W {2}  ev {0:4.0f}'.format (*t.get_points()[0])
+
+        if tim is None: dt_stamp = ''
+        elif isinstance (tim, datetime.datetime):
+            dt_stamp = tim.strftime ('%Y-%m-%d %H:%M')
+        else: dt_stamp = str(tim)
+        
+        return {'aid':a,
+                'change':round (e[-1] - e[0]),
+                'date':dt_stamp,
+                'delta':delta,
                 'gain':gain,
-                'id':a,
+                'label':t.get_label(),
                 'len':distance,
                 'te':trailend, 'th':trailhead,
                 'text':self.__segment[a],
-                'tid':t.get_fingerprint()}
+                'tid':t.get_fingerprint(),
+                'walked':distance}
     
     def as_dict(self)->{}:
-        return {'label':self.get_label(),
+        return {'id':self.get_fingerprint(),
                 'nsegs':len (self.__aids),
                 'mdate':self.__modified.strftime('%Y-%m-%d %H:%M'),
                 'segs':[self._segment (a) for a in self.__aids]}

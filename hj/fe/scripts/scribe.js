@@ -10,27 +10,77 @@ function scribe_cancel()
     document.getElementById ("workbench").removeAttribute ("hidden");
 }
 
+var scribe_seg_data;
+var scribe_seg_index = 0;
+
+function scribe_check_buttons()
+{
+    if (scribe_seg_index + 1 < scribe_seg_data.length)
+    { document.getElementById ("segment_succ").removeAttribute ('disabled'); }
+    else
+    { document.getElementById ("segment_succ").setAttribute ('disabled',''); }
+    
+    if (0 <= scribe_seg_index - 1)
+    { document.getElementById ("segment_prev").removeAttribute ('disabled'); }
+    else
+    { document.getElementById ("segment_prev").setAttribute ('disabled',''); }
+}
+
 function scribe_fill (entry)
 {
-    var form = document.getElementById ("entry_form");
+    var form = '<div><table><caption style="text-align:left;font-weight: bold;">Entry Information</caption>'
 
-    f = '<form><fieldset><legend>Title</legend><table>';
-    f += '<tr><td align="right">Entry Label : </td><td>second test</td></tr>';
-    f += '<tr><td align="right">Segment Number : </td><td>7 of 12</td></tr>';
-    f += '<tr><td align="right">Modified Date : </td><td>Yesterday</td></tr>';
-    f += '</table></fieldset></form><form><fieldset><legend>Segment</legend>';
-    f += '<form><fieldset><legend>Prologue</legend>'
-    f += '<label>Date</label>';
-    f += '<br><label>Trailhead</label>';
-    f += '<br><label>Trailend</label>';
-    f += '<br><label>Distance</label>';
-    f += '<br><label>Elevation Change</label>';
-    f += '<br><label>Elevation Gain</label>';
-    f += '</fieldset></form><textarea></textarea><form><fieldset><legend>Actions</legend>';
-    f += '<button>Previous</button><button>Successor</button>';
-    f += '<button style="margin-left:75px;">Save</button>';
-    f += '</fieldset></form></fieldset></form>';
-    form.innerHTML = f;
+    scribe_seg_data = entry;
+    scribe_seg_index = 0;
+    form += '<tr><td align="right">Segment : </td><td id="segment_number">';
+    form += '1 of ' + entry.segs.length;
+    form += '</td></tr>';
+    form += '<tr><td align="right">Modified Date : </td><td>';
+    form += entry.mdate;
+    form += '</td></tr>';
+    form += '<tr><td align="right">View : </td><td><a href="/viewport/open?id=';
+    form += entry.id;
+    form += '" target="_blank">All</a></td></tr></table></div>';
+    form += '<form><fieldset><legend>Segment</legend>';
+    form += '<div><table><caption style="text-align:left;font-weight: bold;">Prologue</caption>'
+    form += '<tr><td align="right">Label : </td><td id="segment_label"></td></tr>';
+    form += '<tr><td align="right">Date : </td><td id="segment_date"></td></tr>';
+    form += '<tr><td align="right">Trailhead : </td><td id="segment_th"></td></tr>';
+    form += '<tr><td align="right">Trailend : </td><td id="segment_te"></td></tr>';
+    form += '<tr><td align="right">Distance Delta: </td><td id="segment_delta"></td></tr>';
+    form += '<tr><td align="right">Distance Walked: </td><td id="segment_walked"></td></tr>';
+    form += '<tr><td align="right">Elevation Change : </td><td id="segment_change"></td></tr>';
+    form += '<tr><td align="right">Elevation Gain : </td><td id="segment_gain"></td></tr>';
+    form += '<tr><td align="right">View : </td><td id="segment_view"></td></tr>';
+    form +='</table></div><div><textarea id="segment_text"></textarea></div><div>';
+    form += '<button disabled id="segment_prev" onclick="scribe_step(-1);">Previous</button>';
+    form += '<button disabled id="segment_succ" onclick="scribe_step(1);">Successor</button>';
+    form += '<button disabled id="segment_save" onclick="scribe_save();" style="margin-left:75px;">Save</button>';
+    form += '</div></fieldset></form></fieldset></form>';
+    document.getElementById ("entry_form").innerHTML = form;
+    scribe_check_buttons();
+    scribe_seg_fill();
+}
+
+function scribe_seg_fill()
+{
+    document.getElementById ("segment_label").innerHTML = scribe_seg_data.segs[scribe_seg_index].label;
+    document.getElementById ("segment_date").innerHTML = scribe_seg_data.segs[scribe_seg_index].date;
+    document.getElementById ("segment_th").innerHTML = scribe_seg_data.segs[scribe_seg_index].th;
+    document.getElementById ("segment_te").innerHTML = scribe_seg_data.segs[scribe_seg_index].te;
+    document.getElementById ("segment_delta").innerHTML = scribe_seg_data.segs[scribe_seg_index].delta;
+    document.getElementById ("segment_walked").innerHTML = scribe_seg_data.segs[scribe_seg_index].walked;
+    document.getElementById ("segment_change").innerHTML = scribe_seg_data.segs[scribe_seg_index].change;
+    document.getElementById ("segment_gain").innerHTML = scribe_seg_data.segs[scribe_seg_index].gain;
+    document.getElementById ("segment_view").innerHTML = '<a href="http:/viewport/open?id=' + scribe_seg_data.segs[scribe_seg_index].tid + '" target="_blank">segment</a>';
+    document.getElementById ("segment_text").text = scribe_seg_data.segs[scribe_seg_index].text;
+}
+
+function scribe_step (step)
+{
+    scribe_seg_index += step;
+    scribe_check_buttons();
+    scribe_seg_fill()
 }
 
 function scribe_init()
