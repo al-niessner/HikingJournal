@@ -46,6 +46,7 @@ def scribe_new()->bytes:
 @fapp.route ('/scribe/save', methods=['PUT'])
 def scribe_save()->bytes:
     eid = flask.request.args.get ('eid')
+    scribble = json.loads (flask.request.data.decode())
     entry = hj.db.fetch ([eid])[eid]
     entry.update (scribble)
     hj.db.archive (hj.db.EntryType.entry, entry, eid)

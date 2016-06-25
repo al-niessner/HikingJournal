@@ -127,7 +127,7 @@ class Entry(object):
         return
     
     def update (self, d:{})->None:
-        for a,i in d.items(): self.__set_segment (i['text'],a)
+        for s in d['segs']: self.set_segment (s['text'], s['aid'])
         return
     pass
 

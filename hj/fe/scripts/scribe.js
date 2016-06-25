@@ -1,3 +1,10 @@
+
+var scribe_seg_data;
+var scribe_seg_index = 0;
+
+function scribe_activate_save()
+{ document.getElementById ("segment_save").removeAttribute ('disabled'); }
+
 function scribe_cancel()
 {
     var sela = document.getElementById ("annot_list");
@@ -9,9 +16,6 @@ function scribe_cancel()
     document.getElementById ("annot_record").setAttribute ("disabled", "");
     document.getElementById ("workbench").removeAttribute ("hidden");
 }
-
-var scribe_seg_data;
-var scribe_seg_index = 0;
 
 function scribe_check_buttons()
 {
@@ -52,35 +56,14 @@ function scribe_fill (entry)
     form += '<tr><td align="right">Elevation Change : </td><td id="segment_change"></td></tr>';
     form += '<tr><td align="right">Elevation Gain : </td><td id="segment_gain"></td></tr>';
     form += '<tr><td align="right">View : </td><td id="segment_view"></td></tr>';
-    form +='</table></div><div><textarea id="segment_text"></textarea></div><div>';
-    form += '<button disabled id="segment_prev" onclick="scribe_step(-1);">Previous</button>';
-    form += '<button disabled id="segment_succ" onclick="scribe_step(1);">Successor</button>';
-    form += '<button disabled id="segment_save" onclick="scribe_save();" style="margin-left:75px;">Save</button>';
+    form +='</table></div><div><textarea id="segment_text" oninput="scribe_activate_save();" style="height:50vh; width:99%;"></textarea></div><div>';
+    form += '<button disabled id="segment_prev" onclick="scribe_step(-1);" type="button">Previous</button>';
+    form += '<button disabled id="segment_succ" onclick="scribe_step(1);" type="button">Successor</button>';
+    form += '<button disabled id="segment_save" onclick="scribe_save();" style="margin-left:75px;" type="button">Save</button>';
     form += '</div></fieldset></form></fieldset></form>';
     document.getElementById ("entry_form").innerHTML = form;
     scribe_check_buttons();
     scribe_seg_fill();
-}
-
-function scribe_seg_fill()
-{
-    document.getElementById ("segment_label").innerHTML = scribe_seg_data.segs[scribe_seg_index].label;
-    document.getElementById ("segment_date").innerHTML = scribe_seg_data.segs[scribe_seg_index].date;
-    document.getElementById ("segment_th").innerHTML = scribe_seg_data.segs[scribe_seg_index].th;
-    document.getElementById ("segment_te").innerHTML = scribe_seg_data.segs[scribe_seg_index].te;
-    document.getElementById ("segment_delta").innerHTML = scribe_seg_data.segs[scribe_seg_index].delta;
-    document.getElementById ("segment_walked").innerHTML = scribe_seg_data.segs[scribe_seg_index].walked;
-    document.getElementById ("segment_change").innerHTML = scribe_seg_data.segs[scribe_seg_index].change;
-    document.getElementById ("segment_gain").innerHTML = scribe_seg_data.segs[scribe_seg_index].gain;
-    document.getElementById ("segment_view").innerHTML = '<a href="http:/viewport/open?id=' + scribe_seg_data.segs[scribe_seg_index].tid + '" target="_blank">segment</a>';
-    document.getElementById ("segment_text").text = scribe_seg_data.segs[scribe_seg_index].text;
-}
-
-function scribe_step (step)
-{
-    scribe_seg_index += step;
-    scribe_check_buttons();
-    scribe_seg_fill()
 }
 
 function scribe_init()
@@ -159,6 +142,31 @@ function scribe_record()
     connection.send();
 }
 
+function scribe_seg_fill()
+{
+    document.getElementById ("segment_label").innerHTML = scribe_seg_data.segs[scribe_seg_index].label;
+    document.getElementById ("segment_date").innerHTML = scribe_seg_data.segs[scribe_seg_index].date;
+    document.getElementById ("segment_th").innerHTML = scribe_seg_data.segs[scribe_seg_index].th;
+    document.getElementById ("segment_te").innerHTML = scribe_seg_data.segs[scribe_seg_index].te;
+    document.getElementById ("segment_delta").innerHTML = scribe_seg_data.segs[scribe_seg_index].delta;
+    document.getElementById ("segment_walked").innerHTML = scribe_seg_data.segs[scribe_seg_index].walked;
+    document.getElementById ("segment_change").innerHTML = scribe_seg_data.segs[scribe_seg_index].change;
+    document.getElementById ("segment_gain").innerHTML = scribe_seg_data.segs[scribe_seg_index].gain;
+    document.getElementById ("segment_view").innerHTML = '<a href="http:/viewport/open?id=' + scribe_seg_data.segs[scribe_seg_index].tid + '" target="_blank">segment</a>';
+    document.getElementById ("segment_text").value = scribe_seg_data.segs[scribe_seg_index].text;
+}
+
+function scribe_save()
+{
+    var connection = new XMLHttpRequest();
+    var eid = document.getElementById ("entry_list").selectedOptions[0].getAttribute("name");
+    
+    scribe_seg_data.segs[scribe_seg_index].text = document.getElementById ("segment_text").value;
+    document.getElementById ("segment_save").setAttribute ('disabled','');
+    connection.open("PUT", "/scribe/save?eid=" + eid, true);
+    connection.send(JSON.stringify (scribe_seg_data));
+}
+
 function scribe_sels()
 {
     var eid = document.getElementById ("entry_list").selectedOptions[0].getAttribute("name");
@@ -180,3 +188,11 @@ function scribe_sels()
         connection.send();
     }
 }
+
+function scribe_step (step)
+{
+    scribe_seg_index += step;
+    scribe_check_buttons();
+    scribe_seg_fill()
+}
+
