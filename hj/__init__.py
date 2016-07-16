@@ -9,7 +9,8 @@ class Annotated(object):
         object.__init__(self)
         import hj.db
 
-        self.__fp = hj.db._id (('Annotated Track: ' + tid).encode()) 
+        self.__facets = dict()
+        self.__fp = hj.db._id (('Annotated Track: ' + tid).encode())
         self.__map = mid
         self.__photos = pids
         self.__track = tid
@@ -39,6 +40,10 @@ class Annotated(object):
     def get_waypoints (self)->'[GPSElement]':
         import hj.db
         return [w for w in hj.db.fetch (self.__waypts).values()]
+
+    def get_facets(self): return self.__facets.copy()
+    def set_facets (self, facets:{}): self.__facets = facets.copy()
+    def update (self, facets:{}): self.__facets.update (facets)
     pass
 
 class Entry(object):

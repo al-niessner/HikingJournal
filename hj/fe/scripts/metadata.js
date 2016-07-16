@@ -1,6 +1,7 @@
 
 var metadata_count = 0;
 var metadata_expected = 0;
+var metadata_facets = [];
 var metadata_is_initializing = false;
 var metadata_tl = [];
 var metadata_wl = [];
@@ -48,15 +49,91 @@ function metadata_assign()
 
     metadata_busy(1);
     connection.open("PUT", "/metadata/assign?" + params, true);
-    connection.send();
+    connection.send(JSON.stringify (metadata_facets));
 }
 
 function metadata_busy (expected)
 {
     metadata_count = 0;
     metadata_expected = expected;
+    document.getElementById ("add_popup").setAttribute ("hidden","");
     document.getElementById ("workbench").setAttribute ("hidden","");
     document.getElementById ("waiting").removeAttribute ("hidden");
+}
+
+function metadata_facet_add (key, value)
+{
+    document.getElementById ("add_popup").removeAttribute ("hidden");
+    document.getElementById ("waiting").setAttribute ("hidden","");
+    document.getElementById ("workbench").setAttribute ("hidden","");
+    document.getElementById ("input_key").value = key;
+    document.getElementById ("input_value").value = value;
+}
+
+function metadata_facet_done (record)
+{
+    if (record)
+    {
+        metadata_facets.push ({'key':document.getElementById ("input_key").value,
+                               'value':document.getElementById ("input_value").value});
+        metadata_facet_update();
+    }
+    
+    document.getElementById ("add_popup").setAttribute ("hidden","");
+    document.getElementById ("waiting").setAttribute ("hidden","");
+    document.getElementById ("workbench").removeAttribute ("hidden");
+}
+
+function metadata_facet_edit()
+{
+    var self = document.getElementById ("facet_list");
+    var val = "";
+    
+    for (i = 0 ; i < metadata_facets.length ; i++)
+    { if (self.value === metadata_facets[i]) { val = metadata_facets[i]; } }
+    metadata_facet_add (self.value, val);
+}
+
+function metadata_facet_remove()
+{
+    var list = [];
+    var self = document.getElementById ("facet_list");
+
+    for (f = 0 ; f < metadata_facets.length ; f++)
+    {
+        if (metadata_facets[f].key === self.value) {}
+        else { list.push (metadata_facets[f]); }
+    }
+    metadata_facets = list;
+    metadata_facet_update();
+    console.log (self.value);
+}
+
+function metadata_facet_update()
+{
+    var dele = document.getElementById ("facet_remove");
+    var edit = document.getElementById ("facet_edit");
+    var label = document.getElementById ("facet_value");
+    var opts = "";
+    var self = document.getElementById ("facet_list");
+    
+    for (i = 0 ; i < metadata_facets.length ; i++)
+    { opts += "<option>" + metadata_facets[i].key + "</option>"; }
+    
+    if (0 < metadata_facets.length)
+    {
+        dele.removeAttribute ("disabled");
+        edit.removeAttribute ("disabled");
+        label.innerHTML = metadata_facets[0].value;
+    }
+    else
+    {
+        dele.setAttribute ("disabled","");
+        edit.setAttribute ("disabled","");
+        label.innerHTML = "";
+    }
+
+    self.innerHTML = opts;
 }
 
 function metadata_free()
@@ -78,6 +155,7 @@ function metadata_free()
             document.getElementById ("waypt_list").setAttribute ("disabled","");
         }
 
+        document.getElementById ("add_popup").setAttribute ("hidden","");
         document.getElementById ("waiting").setAttribute ("hidden","");
         document.getElementById ("workbench").removeAttribute ("hidden");
     }
@@ -87,6 +165,10 @@ function metadata_init()
 {
     metadata_is_initializing = true;
     metadata_busy (3);
+    document.getElementById ("facet_edit").setAttribute ("disabled","");
+    document.getElementById ("facet_list").innerHTML = "";
+    document.getElementById ("facet_remove").setAttribute ("disabled","");
+    document.getElementById ("facet_value").innerHTML = "";
     metadata_load ("photo_list", "/metadata/photos");
     metadata_load ("track_list", "/metadata/tracks");
     metadata_load ("waypt_list", "/metadata/waypts");
@@ -137,6 +219,14 @@ function metadata_load (lname, nname)
     connection.send();
 }
 
+function metadata_self()
+{
+    var self = document.getElementById ("facet_list");
+
+    for (f = 0 ; f < metadata_facets.length ; f++)
+    { if (self.value === metadata_facets[f].key) document.getElementById ("facet_value").innerHTML = metadata_facets[f].value; }
+}
+
 function metadata_selt()
 {
     var done = document.getElementById ("done_button");
@@ -152,10 +242,16 @@ function metadata_selt()
         selw.setAttribute ("disabled","");
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {selw.selectedOptions[w].selected = false;}
+        document.getElementById ("facet_edit").setAttribute ("disabled","");
+        document.getElementById ("facet_list").innerHTML = "";
+        document.getElementById ("facet_remove").setAttribute ("disabled","");
+        document.getElementById ("facet_value").innerHTML = "";
     }
     else
     {
         var connection = new XMLHttpRequest();
+        var fconnection = new XMLHttpRequest();
+
         connection.onreadystatechange = function()
         {
             if (connection.readyState == 4 && connection.status == 200)
@@ -205,15 +301,31 @@ function metadata_selt()
                 }
                 done.removeAttribute ("disabled");
                 selw.removeAttribute ("disabled");
+                console.log ("end of get track data");
                 metadata_free();
             }
         }
 
-        metadata_busy(1);
+        fconnection.onreadystatechange = function()
+        {
+            if (fconnection.readyState == 4 && fconnection.status == 200)
+            {
+                var data = JSON.parse (fconnection.responseText);
+
+                metadata_facets = data;
+                metadata_facet_update();
+                metadata_free();
+                console.log ("end of get facets");
+            }
+        }
+        
+        metadata_busy(2);
         for (w = 0 ; w < selw.selectedOptions.length ; w++)
         {selw.selectedOptions[w].selected = false;}
         connection.open("GET", "/metadata/collate?tid=" + selt.value, true);
         connection.send();
+        fconnection.open("GET", "/metadata/facets?tid=" + selt.value, true);
+        fconnection.send();
     }
 }
 

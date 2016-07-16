@@ -7,6 +7,7 @@
       #tracks { border:0px; margin:2%; padding:0%; width:24%; }
       #waypts { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
       #photos { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
+      #facets { border:0px; height:40%; margin:2%; padding:0%; width:24%; }
       #map { border:0px; float:right; height:80%; margin:2%; padding:0%; width:68% }
       #status {}
       #update { border:10px; clear:both; margin:1%; padding:0%; width:100%; }
@@ -15,6 +16,15 @@
     <title>Attach Maps and Photos to Tracks and Waypoints</title>
   </head> 
   <body onload="metadata_init();">
+    <div hidden id="add_popup">
+      <label for="input_key">Key</label>
+      <input id="input_key" type="text"></input><br/>
+      <label for="input_value">Value</label>
+      <input id="input_value" type="text"></input><br/>
+      <button onclick="metadata_facet_done(false);">Cancel</button>
+      <button onclick="metadata_facet_done(true);">Record</button>
+    </div>
+    <div hidden id="waiting"><h1>Busy Working...</h1></div>
     <div id="workbench">
       <div id="map">
         <!-- see http://www.w3schools.com/html/html_images.asp and use <map> -->
@@ -44,6 +54,17 @@
           <option>h</option>
         </select>
       </div>
+      <div id="facets">
+        <label for="facet_list">Facets:</label><br/>
+        <dl>
+        <dd><select id="facet_list" name="facet_list" onchange="metadata_self();">
+          <option>i</option>
+          <option>j</option>
+        </select></dd><dt id="facet_value">Some Value</dt><br/>
+        <button id="facet_add" onclick="metadata_facet_add('','');">Add</button>
+        <button id="facet_edit" onclick="metadata_facet_edit();">Edit</button>
+        <button id="facet_remove" onclick="metadata_facet_rm();">Remove</button>
+      </div>
       <div id="status"></div>
       <div id="assign">
         <button disabled id="done_button" onclick="metadata_assign();">Record Annotations</button>
@@ -62,6 +83,5 @@
         </form>
       </div>
     </div>
-    <div hidden id="waiting"><h1>Busy Working...</h1></div>
   </body>
 </html> 

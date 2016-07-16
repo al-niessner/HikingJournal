@@ -21,6 +21,8 @@ def assign()->bytes:
     for k in filter (lambda k:k.endswith ('ids'),
                      kwds.keys()): kwds[k] = kwds[k].split (':')
     a = hj.Annotated(**kwds)
+    facets = json.loads (flask.request.data.decode())
+    a.update (dict([(f['key'],f['value']) for f in facets]))
     hj.db.archive (hj.db.EntryType.annot, a, a.get_fingerprint())
     return b''
 
@@ -54,6 +56,21 @@ def collate()->bytes:
         os.close (fid)
         matplotlib.image.imsave (fn, m.get_image())
         content['map']['name'] = fn
+        pass
+    return json.dumps (content).encode()
+
+@fapp.route ('/metadata/facets', methods=['GET'])
+def facets()->bytes:
+    ad = dict([(a.get_track_fingerprint(), a.get_fingerprint())
+               for a in hj.db.filter(hj.db.EntryType.annot)])
+    content = []
+    tid = flask.request.args.get ('tid')
+
+    if tid in ad:
+        a = hj.db.fetch ([ad[tid]])[ad[tid]]
+        for k,v in sorted (a.get_facets().items(), key=lambda t:t[0]):
+            content.append ({'key':k, 'value':v})
+            pass
         pass
     return json.dumps (content).encode()
 
