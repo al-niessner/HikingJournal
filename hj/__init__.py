@@ -4,7 +4,38 @@ import datetime
 import enum
 import numpy
 
-class Annotated(object):
+VERSION = collections.namedtuple ('VERSION', ['design','impl','bugfix'])
+
+class Version(object):
+    def __getstate__(self):
+        print ('calling get state')
+        state = self.__dict__.copy()
+        state['_version_'] = self._version()
+        return state
+    
+    def __setstate__ (self,state:{}):
+        cur_ver = self._version()
+        old_ver = state['_version_']
+        print ('calling set state', cur_ver, old_ver)
+        del state['_version_']
+        
+        if self.later (old_ver): self._upgrade (old_ver)
+        self.__dict__.update (state)
+        return
+    
+    def _upgrade(self): raise NotImplementedError()
+    def _version(self)->VERSION: raise NotImplementedError()
+
+    def later (self, than:VERSION, now:VERSION=None):
+        if now is None: now = self._version()
+        if than.design == now.design:
+            if than.impl == now.impl: result = than.bugfix < now.bugfix
+            else: result = than.impl < now.impl
+        else: result = than.design < now.design
+        return result
+    pass
+
+class Annotated(Version):
     def __init__(self, tid:str, mid:str=None, pids:[str]=[], wids:[str]=[]):
         object.__init__(self)
         import hj.db
@@ -16,6 +47,9 @@ class Annotated(object):
         self.__track = tid
         self.__waypts = wids
         return
+
+    def _upgrade(self): raise NotImplementedError()
+    def _version(self)->VERSION: return Version(1,1,0)
 
     def get_fingerprint (self)->str:
         '''An identifier that is immutable but unique'''
@@ -46,7 +80,7 @@ class Annotated(object):
     def update (self, facets:{}): self.__facets.update (facets)
     pass
 
-class Entry(object):
+class Entry(Version):
     def __init__ (self, aids:[str], label:str):
         object.__init__(self)
         import hj.db
@@ -87,6 +121,9 @@ class Entry(object):
                 'tid':t.get_fingerprint(),
                 'walked':distance}
     
+    def _upgrade(self): raise NotImplementedError()
+    def _version(self)->VERSION: return Version(1,1,0)
+
     def as_dict(self)->{}:
         return {'id':self.get_fingerprint(),
                 'nsegs':len (self.__aids),
@@ -136,8 +173,11 @@ class Entry(object):
         return
     pass
 
-class GPSElement(object):
+class GPSElement(Version):
     Point = collections.namedtuple ('Point', ['elev', 'lat', 'lon', 'time'])
+
+    def _upgrade(self): raise NotImplementedError()
+    def _version(self)->VERSION: return Version(1,1,0)
 
     def as_dict (self)->{}:
         return {'description':self.get_desc(),
@@ -203,7 +243,7 @@ class GPSElement(object):
         return
     pass
 
-class Map(object):
+class Map(Version):
     class Corner(enum.Enum):
         NorthEast = 0
         SouthEast = 1
@@ -242,6 +282,9 @@ class Map(object):
         path[:,1] = p[:,hj.util.geo.LAT]
         return bb.contains_points (path)
     
+    def _upgrade(self): raise NotImplementedError()
+    def _version(self)->VERSION: return Version(1,1,0)
+
     def all (self, pts:[Point])->bool:
         '''Determine of any of the given points are contained in the map
 
