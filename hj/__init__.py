@@ -4,7 +4,7 @@ import datetime
 import enum
 import numpy
 
-VERSION = collections.namedtuple ('VERSION', ['design','impl','bugfix'])
+VERSION = collections.namedtuple ('VERSION', ['major','minor','patch'])
 
 class Version(object):
     def __getstate__(self):
@@ -28,10 +28,10 @@ class Version(object):
 
     def later (self, than:VERSION, now:VERSION=None):
         if now is None: now = self._version()
-        if than.design == now.design:
-            if than.impl == now.impl: result = than.bugfix < now.bugfix
-            else: result = than.impl < now.impl
-        else: result = than.design < now.design
+        if than.major == now.major:
+            if than.minor == now.minor: result = than.patch < now.patch
+            else: result = than.minor < now.minor
+        else: result = than.major < now.major
         return result
     pass
 
