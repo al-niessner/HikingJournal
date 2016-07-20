@@ -8,7 +8,6 @@ VERSION = collections.namedtuple ('VERSION', ['major','minor','patch'])
 
 class Version(object):
     def __getstate__(self):
-        print ('calling get state')
         state = self.__dict__.copy()
         state['_version_'] = self._version()
         return state
@@ -16,7 +15,6 @@ class Version(object):
     def __setstate__ (self,state:{}):
         cur_ver = self._version()
         old_ver = state['_version_']
-        print ('calling set state', cur_ver, old_ver)
         del state['_version_']
         
         if self.later (old_ver): self._upgrade (old_ver)
@@ -49,7 +47,7 @@ class Annotated(Version):
         return
 
     def _upgrade(self): raise NotImplementedError()
-    def _version(self)->VERSION: return Version(1,1,0)
+    def _version(self)->VERSION: return VERSION(1,1,0)
 
     def get_fingerprint (self)->str:
         '''An identifier that is immutable but unique'''
@@ -122,7 +120,7 @@ class Entry(Version):
                 'walked':distance}
     
     def _upgrade(self): raise NotImplementedError()
-    def _version(self)->VERSION: return Version(1,1,0)
+    def _version(self)->VERSION: return VERSION(1,1,0)
 
     def as_dict(self)->{}:
         return {'id':self.get_fingerprint(),
@@ -177,7 +175,7 @@ class GPSElement(Version):
     Point = collections.namedtuple ('Point', ['elev', 'lat', 'lon', 'time'])
 
     def _upgrade(self): raise NotImplementedError()
-    def _version(self)->VERSION: return Version(1,1,0)
+    def _version(self)->VERSION: return VERSION(1,1,0)
 
     def as_dict (self)->{}:
         return {'description':self.get_desc(),
@@ -283,7 +281,7 @@ class Map(Version):
         return bb.contains_points (path)
     
     def _upgrade(self): raise NotImplementedError()
-    def _version(self)->VERSION: return Version(1,1,0)
+    def _version(self)->VERSION: return VERSION(1,1,0)
 
     def all (self, pts:[Point])->bool:
         '''Determine of any of the given points are contained in the map
