@@ -24,6 +24,27 @@ def db (ap : argparse.ArgumentParser, call) -> argparse.ArgumentParser:
     '''add the common db args to the arg parser'''
     ap.add_argument ('-W', '--working-dir', required=True, type=_path,
                      help='the journals working directory where all of the data is kept')
+    ap.add_argument ('-a', '--annotation-only', action='store_true',
+                     default=False, required=False,
+                     help='list the annotation names')
+    ap.add_argument ('-e', '--entry-only', action='store_true',
+                     default=False, required=False,
+                     help='list the entry names')
+    ap.add_argument ('-m', '--map-only', action='store_true',
+                     default=False, required=False,
+                     help='list the map names')
+    ap.add_argument ('-p', '--photo-only', action='store_true',
+                     default=False, required=False,
+                     help='list the photo names')
+    ap.add_argument ('-r', '--route-only', action='store_true',
+                     default=False, required=False,
+                     help='list the route names')
+    ap.add_argument ('-t', '--track-only', action='store_true',
+                     default=False, required=False,
+                     help='list the track names')
+    ap.add_argument ('-w', '--waypoint-only', action='store_true',
+                     default=False, required=False,
+                     help='list the waypoint names')
     ap.set_defaults (call=call)
     return ap
 

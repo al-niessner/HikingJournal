@@ -101,7 +101,6 @@ def stats()->{}:
     with _open() as db: ets = [v for v in db.values()]
     result['total'] = len (ets)
     for et in EntryType: result[et.name] = ets.count (et)
-    print (result)
     return result
 
 def update (id:str, item)->None:

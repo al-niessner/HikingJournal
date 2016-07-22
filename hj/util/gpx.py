@@ -32,7 +32,7 @@ class Element(hj.GPSElement):
 
     def __setstate__ (self, state):
         state['_points'] = [hj.GPSElement.Point(**p) for p in state['_points']]
-        return super().__setstatate__ (state)
+        return super().__setstate__ (state)
     
     def get_desc (self)->str: return self._desc
     def get_fingerprint (self)->str: return self._fp

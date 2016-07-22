@@ -5,23 +5,47 @@ import argparse
 import os
 import sys
 
+def _db_display (title:str, l:[]):
+    print (title + ' count is ' + str(len(l)) + ' and the names are:')
+    for item in l: print ('   ' + item.get_label())
+    return
+
 def db (args:argparse.Namespace):
     import hj.config
     import hj.db
 
     hj.config.wdir = args.working_dir
-    print ('''
+
+    if any([args.annotation_only, args.entry_only, args.map_only,
+            args.photo_only, args.route_only, args.track_only,
+            args.waypoint_only]):
+        if args.annotation_only: _db_display ('Annotation', hj.db.filter
+                                              (hj.db.EntryType.annot))
+        if args.entry_only: _db_display ('Entry', hj.db.filter
+                                         (hj.db.EntryType.entry))
+        if args.map_only: _db_display ('Map', hj.db.filter
+                                       (hj.db.EntryType.map))
+        if args.photo_only: _db_display ('Photo', hj.db.filter
+                                         (hj.db.EntryType.photo))
+        if args.route_only: _db_display ('Route', hj.db.filter
+                                         (hj.db.EntryType.route))
+        if args.track_only: _db_display ('Track', hj.db.filter
+                                         (hj.db.EntryType.track))
+        if args.waypoint_only: _db_display ('Waypoint', hj.db.filter
+                                            (hj.db.EntryType.waypt))
+    else: print ('''
 Database Statistics:
   Annotations %(annot)d
   Entries:    %(entry)d
   Maps:       %(map)d
+  Photos:     %(photo)d
   Raw:        %(raw)d
   Routes:     %(route)d
   Tracks:     %(track)d
   Waypoints:  %(waypt)d
 
   Total:     %(total)d
-    ''' % hj.db.stats())
+  ''' % hj.db.stats())
     return
 
 def device (args : argparse.Namespace):

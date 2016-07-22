@@ -20,10 +20,12 @@ class Version(object):
         return state
     
     def __setstate__ (self,state:{}):
-        cur_ver = self._version()
-        old_ver = state['_version_']
-        del state['_version_']
+        if '_version_' in state:
+            old_ver = state['_version_']
+            del state['_version_']
+        else: old_ver = self._version()
         
+        cur_ver = self._version()
         if self.later (old_ver): self._upgrade (old_ver)
         self.__dict__.update (state)
         return
@@ -84,6 +86,7 @@ class Annotated(Version):
     def set_facets (self, facets:{}): self.__facets = facets.copy()
     def update (self, facets:{}): self.__facets.update (facets)
 
+    def get_label(self)->str: return self.get_track().get_label()
     def get_type(self)->TrailType: return TrailType.line
     pass
 
@@ -318,6 +321,7 @@ class Map(Version):
         '''
         raise NotImplementedError()
 
+    def get_label(self)->str: return self.get_name()
     def get_name(self)->str:
         '''Return the string representation of the map
         '''
@@ -374,4 +378,5 @@ class Map(Version):
     pass
 
 class Photos(object):
+    def get_label(self): return NotImplementedError()
     pass
