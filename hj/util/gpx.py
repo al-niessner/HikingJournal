@@ -25,13 +25,14 @@ class Element(hj.GPSElement):
         return
 
     def __getstate__ (self):
+        state = super().__getstate__()
         state = self.__dict__.copy()
         state['_points'] = [p._asdict() for p in state['_points']]
         return state
 
     def __setstate__ (self, state):
         state['_points'] = [hj.GPSElement.Point(**p) for p in state['_points']]
-        return self.__dict__.update (state)
+        return super().__setstatate__ (state)
     
     def get_desc (self)->str: return self._desc
     def get_fingerprint (self)->str: return self._fp

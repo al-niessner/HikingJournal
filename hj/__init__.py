@@ -6,6 +6,13 @@ import numpy
 
 VERSION = collections.namedtuple ('VERSION', ['major','minor','patch'])
 
+class TrailType(enum.Enum):
+    line = 'In and Out'
+    lollipop = 'Lollipop'
+    loop = 'Loop'
+    shuttle = 'Shuttle'
+    pass
+
 class Version(object):
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -76,6 +83,8 @@ class Annotated(Version):
     def get_facets(self): return self.__facets.copy()
     def set_facets (self, facets:{}): self.__facets = facets.copy()
     def update (self, facets:{}): self.__facets.update (facets)
+
+    def get_type(self)->TrailType: return TrailType.line
     pass
 
 class Entry(Version):
