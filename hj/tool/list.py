@@ -2,19 +2,18 @@
 '''List all of the available routes, tracks, and waypoints.'''
 
 import argparse
+import logging
 import os
 import sys
 
 def _db_display (title:str, l:[]):
     print (title + ' count is ' + str(len(l)) + ' and the names are:')
-    for item in l: print ('   ' + item.get_label())
+    for item in l: print ('   "' + item.get_label() + '"')
     return
 
 def db (args:argparse.Namespace):
     import hj.config
     import hj.db
-
-    hj.config.wdir = args.working_dir
 
     if any([args.annotation_only, args.entry_only, args.map_only,
             args.photo_only, args.route_only, args.track_only,
@@ -62,16 +61,20 @@ def device (args : argparse.Namespace):
 if __name__ == '__main__':
     sys.path.append (os.path.abspath (os.path.join (os.path.dirname (__file__),
                                                     '../..')))
+    import hj.config
     import hj.util.args
 
     ap = argparse.ArgumentParser(description='This tool allows the hiking journal system to be examined.')
+    hj.util.args.base (ap)
     sp = ap.add_subparsers(title='subsystem')
-    dbap = hj.util.args.db (sp.add_parser('db',
-                                          help='List statistics and information contained in the journal database.'),
-                            db)
+    dbap = hj.util.args.db \
+           (hj.util.args.select
+            (sp.add_parser('db', help='List statistics and information contained in the journal database.')), db)
     dap = hj.util.args.device_input (sp.add_parser('device',
                                                    help='List all of the available routes, tracks, and waypoints over the given devices. Each device takes its own keywords for construction. Please use the tool "device" for getting details on device keywords. For this tool, each device will be followed by its -p switches.'),
                                      device)
     args = ap.parse_args()
+    hj.config.load (args.config_file)
+    hj.config.wdir = args.working_dir if args.working_dir else hj.config.wdir
     args.call (args)
     pass

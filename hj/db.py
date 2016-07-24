@@ -5,6 +5,7 @@ import builtins
 import enum
 import hashlib
 import hj.config
+import hj.db
 import os
 import pickle
 import shelve
@@ -94,6 +95,13 @@ def filter (et:EntryType)->[]:
 def insert (et:EntryType, id:str):
     '''Insert an entry into the database'''
     with _open() as db: db[id] = et
+    return
+
+def seek (labels:[str], et:EntryType):
+    '''Genertor to iterate over all types with a given set of labels'''
+    for e in hj.db.filter (et):
+        if e.get_label() in labels: yield e
+        pass
     return
 
 def stats()->{}:

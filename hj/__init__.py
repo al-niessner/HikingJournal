@@ -87,7 +87,6 @@ class Annotated(Version):
     def update (self, facets:{}): self.__facets.update (facets)
 
     def get_label(self)->str: return self.get_track().get_label()
-    def get_type(self)->TrailType: return TrailType.line
     pass
 
 class Entry(Version):
@@ -105,14 +104,15 @@ class Entry(Version):
     def _segment (self, a):
         import hj.db
 
-        t = hj.db.fetch ([a])[a].get_track()
+        annot = hj.db.fetch ([a])[a]
+        t = annot.get_track()
         e = [p.elev for p in t.get_points()]
         tim = t.get_points()[0].time
         gain = numpy.diff (e)
         gain = round (gain[0 < gain].sum())
         delta = distance = 'undefined'
-        trailend = 'N {1}  W {2}  ev {0:4.0f}'.format (*t.get_points()[-1])
-        trailhead = 'N {1}  W {2}  ev {0:4.0f}'.format (*t.get_points()[0])
+        trailend = 'N {1:2.5f}  W {2:3.5f}  ev {0:4.0f}'.format (*t.get_points()[-1])
+        trailhead = 'N {1:2.5f}  W {2:3.5f}  ev {0:4.0f}'.format (*t.get_points()[0])
 
         if tim is None: dt_stamp = ''
         elif isinstance (tim, datetime.datetime):
@@ -123,6 +123,8 @@ class Entry(Version):
                 'change':round (e[-1] - e[0]),
                 'date':dt_stamp,
                 'delta':delta,
+                'description':t.get_desc(),
+                'facets': annot.get_facets(),
                 'gain':gain,
                 'label':t.get_label(),
                 'len':distance,
@@ -136,9 +138,11 @@ class Entry(Version):
 
     def as_dict(self)->{}:
         return {'id':self.get_fingerprint(),
+                'label':self.get_label(),
                 'nsegs':len (self.__aids),
                 'mdate':self.__modified.strftime('%Y-%m-%d %H:%M'),
-                'segs':[self._segment (a) for a in self.__aids]}
+                'segs':[self._segment (a) for a in self.__aids],
+                'type':self.get_type().value}
     
     def get_fingerprint (self)->str:
         '''An identifier that is immutable but unique'''
@@ -162,6 +166,8 @@ class Entry(Version):
             raise AttributeError('aid must be defined if more than one segment')
         return self.__segment[aid]
     
+    def get_type(self)->TrailType: return TrailType.line
+
     def set_label (self, label:str)->None:
         '''Set, potentially updating, the label of this element'''
         self.__label = label

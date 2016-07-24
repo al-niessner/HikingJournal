@@ -20,11 +20,13 @@ def _dir():
 def initialize():
     import hj.config
 
-    hj.config.wdir = '${HOME}/Hiking/Journal'
     hj.config.dt = hj.device.Type.local_file.name
+    hj.config.formatters = {'html':'hj.util.format.html',
+                            'markdown':'hj.util.format.markdown'}
     hj.config.garmin_etrex_10__mp = '${HOME}'
     hj.config.local_file__dir = '${HOME}'
     hj.config.viewer = '/usr/bin/eog'
+    hj.config.wdir = '${HOME}/Hiking/Journal'
     return
 
 def load (fn):
