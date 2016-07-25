@@ -126,6 +126,7 @@ class Entry(Version):
                 'date':dt_stamp,
                 'delta':delta + ' Km',
                 'description':t.get_desc(),
+                'elmm':{'min':round (min(e)), 'max':round (max(e))},
                 'facets': annot.get_facets(),
                 'gain':gain,
                 'label':t.get_label(),
