@@ -4,6 +4,7 @@ import hj
 import hj.db
 import io
 import logging ; log = logging.getLogger(__name__)
+import numpy
 import os
 import osgeo.ogr
 
@@ -33,8 +34,27 @@ class Element(hj.GPSElement):
     def __setstate__ (self, state):
         state['_points'] = [hj.GPSElement.Point(**p) for p in state['_points']]
         return super().__setstate__ (state)
+
+    def _arc2km (self, arc:float)->float:
+        Re = 6378.1370 # Km
+        Rp = 6356.7523 # Km
+        lat = numpy.mean([p.lat for p in self._points]) / 180. * numpy.pi
+        R = numpy.sqrt (((Re**2 * numpy.cos(lat))**2 + (Rp**2 * numpy.sin(lat))**2)/
+                        ((Re * numpy.cos(lat))**2 + (Rp * numpy.sin (lat))**2))
+        R += numpy.mean ([p.elev for p in self._points]) / 1000. # Km
+        return arc * R * numpy.pi / 180.
     
     def get_desc (self)->str: return self._desc
+    def get_distance (self)->(float,float):
+        if 1 < len (self._points):
+            ep = osgeo.ogr.Geometry(osgeo.ogr.wkbLineString)
+            ep.AddPoint(self._points[0].lon, self._points[0].lat)
+            ep.AddPoint(self._points[-1].lon, self._points[-1].lat)
+            gt = osgeo.ogr.Geometry(osgeo.ogr.wkbLineString)
+            for p in self._points: gt.AddPoint(p.lon, p.lat)
+            result = self._arc2km (gt.Length()), self._arc2km(ep.Length())
+        else: result = 0.0,0.0
+        return result
     def get_fingerprint (self)->str: return self._fp
     def get_label (self)->str: return self._label
     def get_name (self)->str: return self._name

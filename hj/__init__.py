@@ -110,9 +110,11 @@ class Entry(Version):
         tim = t.get_points()[0].time
         gain = numpy.diff (e)
         gain = round (gain[0 < gain].sum())
-        delta = distance = 'undefined'
-        trailend = 'N {1:2.5f}  W {2:3.5f}  ev {0:4.0f}'.format (*t.get_points()[-1])
-        trailhead = 'N {1:2.5f}  W {2:3.5f}  ev {0:4.0f}'.format (*t.get_points()[0])
+        d = t.get_distance()
+        delta = '{0:4.2f}'.format (d[1])
+        distance = '{0:4.2f}'.format (d[0])
+        trailend = 'N {1:2.5f}  W {2:3.5f}  ev {0:4.0f}m'.format (*t.get_points()[-1])
+        trailhead = 'N {1:2.5f}  W {2:3.5f}  ev {0:4.0f}m'.format (*t.get_points()[0])
 
         if tim is None: dt_stamp = ''
         elif isinstance (tim, datetime.datetime):
@@ -122,7 +124,7 @@ class Entry(Version):
         return {'aid':a,
                 'change':round (e[-1] - e[0]),
                 'date':dt_stamp,
-                'delta':delta,
+                'delta':delta + ' Km',
                 'description':t.get_desc(),
                 'facets': annot.get_facets(),
                 'gain':gain,
@@ -131,7 +133,7 @@ class Entry(Version):
                 'te':trailend, 'th':trailhead,
                 'text':self.__segment[a],
                 'tid':t.get_fingerprint(),
-                'walked':distance}
+                'walked':distance + ' Km'}
     
     def _upgrade(self): raise NotImplementedError()
     def _version(self)->VERSION: return VERSION(1,1,0)
@@ -205,6 +207,14 @@ class GPSElement(Version):
     
     def get_desc (self)->str:
         '''User provided amd mutaable text scribing this GPS Element'''
+        raise NotImplementedError()
+
+    def get_distance (self)->(float,float):
+        '''Returns the length of track
+
+        If there is a single point in the element, then return (0,0).
+        Otherwise, returns the (length traveled, distance between first and last)
+        '''
         raise NotImplementedError()
     
     def get_fingerprint (self)->str:
