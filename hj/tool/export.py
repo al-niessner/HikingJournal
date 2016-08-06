@@ -26,10 +26,14 @@ def entry (args):
     
     if not os.path.exists (args.output_dir): os.makedirs (args.output_dir)
     if not os.path.isdir (args.output_dir): raise ValueError('Given output path is not a directory.')
+
+    image_dir = os.path.join (args.output_dir, 'images')
+    if not os.path.isdir (image_dir): os.makedirs (image_dir)
     
     with open (args.template_header, 'rt') as f: th = f.read()
     with open (args.template_segment, 'rt') as f: ts = f.read()
     for e in hj.db.seek (args.name, hj.db.EntryType.entry):
+        e.write_images (image_dir)
         this = e.as_dict()
         hdr = _replace (th, this)
         seg = [_replace (ts, this, s) for s in this['segs']]

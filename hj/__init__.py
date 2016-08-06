@@ -3,6 +3,7 @@ import collections
 import datetime
 import enum
 import numpy
+import os
 
 VERSION = collections.namedtuple ('VERSION', ['major','minor','patch'])
 
@@ -131,6 +132,7 @@ class Entry(Version):
                 'gain':gain,
                 'label':t.get_label(),
                 'len':distance,
+                'map':annot.get_maps().get_fingerprint(),
                 'te':trailend, 'th':trailhead,
                 'text':self.__segment[a],
                 'tid':t.get_fingerprint(),
@@ -189,6 +191,22 @@ class Entry(Version):
     
     def update (self, d:{})->None:
         for s in d['segs']: self.set_segment (s['text'], s['aid'])
+        return
+
+    def write_images (self, odir):
+        import hj.db
+        
+        annots = hj.db.fetch (self.__aids)
+        for aid in self.__aids:
+            m = annots[aid].get_maps()
+            with open (os.path.join (odir, m.get_fingerprint()), 'bw') as f:
+                f.write (m.get_image())
+                pass
+            for p in annots[aid].get_photos():
+                with open (os.path.join (odir, p.get_fingerprint()),'bw') as f:
+                    f.write (p.get_image())
+                    pass
+                pass
         return
     pass
 
@@ -396,4 +414,5 @@ class Map(Version):
 
 class Photos(object):
     def get_label(self): return NotImplementedError()
+    def get_image(self): return NotImplementedError()
     pass
