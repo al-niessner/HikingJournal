@@ -97,6 +97,11 @@ def insert (et:EntryType, id:str):
     with _open() as db: db[id] = et
     return
 
+def remove (et:EntryType, id:str):
+    os.unlink (os.path.join (hj.config.wdir, id))
+    with _open() as db: del db[id]
+    return
+    
 def seek (labels:[str], et:EntryType):
     '''Genertor to iterate over all types with a given set of labels'''
     for e in hj.db.filter (et):

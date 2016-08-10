@@ -84,6 +84,31 @@ def entry (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
     ap.set_defaults (call=call)
     return ap
 
+def journal (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
+    '''add the specific entry conversion arguments'''
+    ap.add_argument ('-f', '--format', nargs='+', required=True,
+                     choices=['html','markdown'],
+                     help='one or more of the possible export formats')
+    ap.add_argument ('-O', '--output-dir', required=True,
+                     help='deposit all of the transforms into this directory')
+    ap.add_argument ('-n', '--template-navigate',
+                     default=os.path.join (os.path.dirname (__file__),
+                                           'templates/navigate.md'),
+                     required=False, type=_filename,
+                     help='template in markdown for each segment')
+    ap.add_argument ('-s', '--template-segment',
+                     default=os.path.join (os.path.dirname (__file__),
+                                           'templates/segment.md'),
+                     required=False, type=_filename,
+                     help='template in markdown for each segment')
+    ap.add_argument ('-t', '--template-header',
+                     default=os.path.join (os.path.dirname (__file__),
+                                           'templates/header.md'),
+                     required=False, type=_filename,
+                     help='template in markdown for an entry header')
+    ap.set_defaults (call=call)
+    return ap
+
 def kvpair (s:str) -> str:
     if len (s.split ('=')) != 2:
         raise ValueError('The given input "' + s +

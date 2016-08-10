@@ -6,6 +6,14 @@ import logging
 import os
 import sys
 
+def _entry (e, fmt, idir, odir, th, ts):
+    e.write_images (idir)
+    this = e.as_dict()
+    hdr = _replace (th, this)
+    seg = [_replace (ts, this, s) for s in this['segs']]
+    for f in fmt: hj.util.format.entry (f, odir, e.get_label(), hdr, seg)
+    return
+
 def _replace (t:str, this={}, segment={})->str:
     index = t.find ('${')
     while -1 < index:
@@ -32,7 +40,24 @@ def entry (args):
     
     with open (args.template_header, 'rt') as f: th = f.read()
     with open (args.template_segment, 'rt') as f: ts = f.read()
-    for e in hj.db.seek (args.name, hj.db.EntryType.entry):
+    for e in hj.db.seek (args.name, hj.db.EntryType.entry): \
+        _entry (e, args.format, image_dir, args.output_dir, th, ts)
+    return
+
+def journal (args):
+    import hj.db
+    import hj.util.format
+    
+    if not os.path.exists (args.output_dir): os.makedirs (args.output_dir)
+    if not os.path.isdir (args.output_dir): raise ValueError('Given output path is not a directory.')
+
+    image_dir = os.path.join (args.output_dir, 'images')
+    if not os.path.isdir (image_dir): os.makedirs (image_dir)
+    
+    with open (args.template_header, 'rt') as f: th = f.read()
+    with open (args.template_segment, 'rt') as f: ts = f.read()
+    for e in hj.db.filter (hj.db.EntryType.entry):
+        print (e.get_label())
         e.write_images (image_dir)
         this = e.as_dict()
         hdr = _replace (th, this)
@@ -54,7 +79,8 @@ if __name__ == '__main__':
     hj.util.args.base (ap)
     hj.util.args.db (ap, None)
     sp = ap.add_subparsers(title='subsystem')
-    iap = hj.util.args.entry (sp.add_parser('entry', help='Convert an entry to specified form'), entry)
+    eap = hj.util.args.entry (sp.add_parser('entry', help='Convert an entry to specified form'), entry)
+    jap = hj.util.args.journal (sp.add_parser('journal', help='Convert the entire journal specified form'), journal)
     args = ap.parse_args()
     hj.config.load (args.config_file)
     hj.config.wdir = args.working_dir if args.working_dir else hj.config.wdir
