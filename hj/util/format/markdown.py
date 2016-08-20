@@ -10,3 +10,7 @@ def entry (outdir:str, name:str, prologue:str, segments:[str]):
             pass
         pass
     return
+
+def navigate (outdir:str, nav):
+    with open (os.path.join (outdir, 'index.md'), 'tw') as f: f.write (nav)
+    return

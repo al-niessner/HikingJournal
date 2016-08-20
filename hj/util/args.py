@@ -96,6 +96,8 @@ def journal (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
                                            'templates/navigate.md'),
                      required=False, type=_filename,
                      help='template in markdown for each segment')
+    ap.add_argument ('-p', '--port', default=10101, required=False, type=int,
+                     help='port number for viewing the journal')
     ap.add_argument ('-s', '--template-segment',
                      default=os.path.join (os.path.dirname (__file__),
                                            'templates/segment.md'),
@@ -106,6 +108,8 @@ def journal (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
                                            'templates/header.md'),
                      required=False, type=_filename,
                      help='template in markdown for an entry header')
+    ap.add_argument ('-v', '--view', action='store_true', default=False,
+                     required=False, help='start a webserver and browser point at the index page')
     ap.set_defaults (call=call)
     return ap
 

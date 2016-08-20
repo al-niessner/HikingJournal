@@ -14,7 +14,19 @@ def _entry (e, fmt, idir, odir, th, ts):
     for f in fmt: hj.util.format.entry (f, odir, e.get_label(), hdr, seg)
     return
 
-def _replace (t:str, this={}, segment={})->str:
+def _navigate (el, fmt, idir, odir, nv):
+    vals = {}
+    for line in nv.split('\n'):
+        if -1 < line.find ('${'): vals[line] = []
+        pass
+    for e in sorted (el, key=lambda k:k.get_label()):
+        for l in vals.keys(): vals[l].append (_replace (l, e.as_dict(), item=e))
+        pass
+    for l,v in vals.items(): nv = nv.replace (l, '\n'.join (vals[l]))
+    for f in fmt: hj.util.format.navigate (f, odir, nv)
+    return
+
+def _replace (t:str, this={}, segment={}, item=None)->str:
     index = t.find ('${')
     while -1 < index:
         l = t.find ('}', index+2)
@@ -27,6 +39,12 @@ def _replace (t:str, this={}, segment={})->str:
         index = t.find ('${', index)
         pass
     return t
+
+def _viewer (bdir, port):
+    print (bdir, port)
+    hj.fe.util.conjure (port)
+    hj.fe.view (port, bdir)
+    return
 
 def entry (args):
     import hj.db
@@ -46,6 +64,8 @@ def entry (args):
 
 def journal (args):
     import hj.db
+    import hj.fe
+    import hj.fe.util
     import hj.util.format
     
     if not os.path.exists (args.output_dir): os.makedirs (args.output_dir)
@@ -53,20 +73,16 @@ def journal (args):
 
     image_dir = os.path.join (args.output_dir, 'images')
     if not os.path.isdir (image_dir): os.makedirs (image_dir)
-    
+
+    with open (args.template_navigate, 'rt') as f: nv = f.read()
     with open (args.template_header, 'rt') as f: th = f.read()
     with open (args.template_segment, 'rt') as f: ts = f.read()
-    for e in hj.db.filter (hj.db.EntryType.entry):
-        print (e.get_label())
-        e.write_images (image_dir)
-        this = e.as_dict()
-        hdr = _replace (th, this)
-        seg = [_replace (ts, this, s) for s in this['segs']]
-        for f in args.format: hj.util.format.entry (f,
-                                                    args.output_dir,
-                                                    e.get_label(),
-                                                    hdr, seg)
-        pass
+    items = hj.db.filter (hj.db.EntryType.entry)
+    _navigate (items, args.format, image_dir, args.output_dir, nv)
+    for item in items: \
+        _entry (item, args.format, image_dir, args.output_dir, th, ts)
+
+    if args.view: _viewer (args.output_dir, args.port)
     return
 
 if __name__ == '__main__':

@@ -195,13 +195,13 @@ class Entry(Version):
 
     def write_images (self, odir):
         import hj.db
+        import matplotlib
         
         annots = hj.db.fetch (self.__aids)
         for aid in self.__aids:
             m = annots[aid].get_maps()
-            with open (os.path.join (odir, m.get_fingerprint()), 'bw') as f:
-                f.write (m.get_image())
-                pass
+            fn = os.path.join (odir, m.get_fingerprint()) + '.png'
+            matplotlib.image.imsave (fn, m.get_image())
             for p in annots[aid].get_photos():
                 with open (os.path.join (odir, p.get_fingerprint()),'bw') as f:
                     f.write (p.get_image())
