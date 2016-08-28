@@ -4,6 +4,7 @@
 import cherrypy
 import cherrypy.wsgiserver
 import flask
+import hj.config
 import hj.fe
 import os
 
@@ -19,6 +20,18 @@ def _join (template:bytes, **kwds)->bytes:
 @fapp.route ('/')
 def _root()->bytes: return _static ('/html/welcome.html')
 
+@fapp.route ('/page/<filename>')
+def _page (filename)->bytes:
+    return _static (os.path.join (os.path.join (hj.config.wdir, 'pages'),
+                                  'index.html' if len (filename) == 0
+                                               else filename))
+
+@fapp.route ('/page/images/<filename>')
+def _image(filename)->bytes:
+    return _static (os.path.join (os.path.join (hj.config.wdir, 'pages/images'),
+                                  'index.html' if len (filename) == 0
+                                               else filename))
+
 @vapp.route ('/')
 def _vroot()->bytes: return _static ('/index.html')
 
@@ -31,8 +44,11 @@ def _vimage (filename)->bytes:
     return _static ('images/' + filename)
 
 def _static (fn:str)->bytes:
-    while fn.startswith ('/'): fn = fn[1:]
-    ffn = os.path.join (hj.fe._rootdir, fn)
+    if not fn.startswith (hj.config.wdir):
+        while fn.startswith ('/'): fn = fn[1:]
+        ffn = os.path.join (hj.fe._rootdir, fn)
+    else: ffn = fn
+    
     result = ('<h1>404 File Not Found</h1><p>Error finding static file: ' +
               ffn + '</p>').encode()
     with open (ffn, 'rb') as f: result = f.read()

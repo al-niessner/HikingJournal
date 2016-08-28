@@ -4,6 +4,7 @@
 import argparse
 import logging
 import os
+import shutil
 import sys
 
 def _entry (e, fmt, idir, odir, th, ts):
@@ -81,7 +82,11 @@ def journal (args):
     _navigate (items, args.format, image_dir, args.output_dir, nv)
     for item in items: \
         _entry (item, args.format, image_dir, args.output_dir, th, ts)
-
+    favicon = os.path.abspath (os.path.join (os.path.join
+                                             (os.path.dirname (__file__),
+                                              '..'),
+                                             'fe/resources/favicon.ico'))
+    shutil.copy (favicon, args.output_dir)
     if args.view: _viewer (args.output_dir, args.port)
     return
 
