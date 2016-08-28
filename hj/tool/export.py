@@ -101,4 +101,8 @@ if __name__ == '__main__':
     hj.config.load (args.config_file)
     hj.config.wdir = args.working_dir if args.working_dir else hj.config.wdir
     args.call (args)
+else:
+    import hj.config
+    import hj.db
+    import hj.util.format
     pass

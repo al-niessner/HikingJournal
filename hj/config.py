@@ -25,6 +25,12 @@ def initialize():
                             'markdown':'hj.util.format.markdown'}
     hj.config.garmin_etrex_10__mp = '${HOME}'
     hj.config.local_file__dir = '${HOME}'
+    hj.config.templates = {'hdr':os.path.join (os.path.dirname (__file__),
+                                               'util/templates/header.md'),
+                           'nav':os.path.join (os.path.dirname (__file__),
+                                               'util/templates/navigate.md'),
+                           'seg':os.path.join (os.path.dirname (__file__),
+                                               'util/templates/segment.md')}
     hj.config.viewer = '/usr/bin/eog'
     hj.config.wdir = '${HOME}/Hiking/Journal'
     return

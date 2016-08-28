@@ -6,7 +6,20 @@
       {
         document.getElementById("stop_server").submit();
         setTimeout (window.close, 500);
-      } 
+      }
+
+      function protectUpdate()
+      {
+        var connection = new XMLHttpRequest();
+        document.getElementById("server_update").setAttribute ("disabled","");
+        connection.onreadystatechange = function()
+        {
+          if (connection.readyState == 4 && connection.status == 200)
+          {document.getElementById("server_update").removeAttribute ("disabled");}
+        }
+        connection.open ("GET", "/update", true);
+        connection.send();
+      }
     </script>
     <title>Hiking Journal</title>
   </head>
@@ -20,6 +33,8 @@
     <form action="/pages/scribe" style="float:left ; margin-right:10px" target="main_view"><input type="submit" value="Scribe Entry"/></form>
 
     <form action="/setup" style="float:left ; margin-right:10px" target="main_view"><input type="submit" value="Settup"/></form>
+
+    <input id="server_update" onclick="protectUpdate();" style="float:left ; margin-right:10px" type="button" value="Update"/>
 
     <input style="float:left" type="button" value="Quit" onclick="frontEndShutdown();"/>
     <form id="stop_server" action="/stop"><input type="hidden" value="Stop"/></form>
