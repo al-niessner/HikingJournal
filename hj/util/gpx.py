@@ -1,4 +1,5 @@
 
+import datetime
 import gpxpy
 import hj
 import hj.db
@@ -68,6 +69,7 @@ def parse (data:io.TextIOBase, fn:str)->[Element]:
     bfn = os.path.basename (fn)
     gpx = gpxpy.parse (data)
     result = []
+    stdt = datetime.datetime(1890,1,1,0,0,0)
     for r in gpx.routes: raise NotImplementedError()
     for t in gpx.tracks:
         pts = []
@@ -75,7 +77,7 @@ def parse (data:io.TextIOBase, fn:str)->[Element]:
             for p in s.points: pts.append (hj.GPSElement.Point(elev=p.elevation,
                                                                lat=p.latitude,
                                                                lon=p.longitude,
-                                                               time=p.time))
+                                                               time=stdt if p.time is None else p.time))
             pass
         result.extend (trim (Element(bfn, pts, hj.db.EntryType.track, t.name)))
     for w in gpx.waypoints:
@@ -88,7 +90,7 @@ def parse (data:io.TextIOBase, fn:str)->[Element]:
     return result
 
 def trim (t:hj.GPSElement)->[hj.GPSElement]:
-    dl, dt, pts, result = [],[], t.get_points(),[t]
+    dl, dt, pts, result = [0],[0],t.get_points(),[t]
     for i,p in enumerate(pts[:-1]):
         g0 = osgeo.ogr.Geometry(osgeo.ogr.wkbPoint)
         g0.AddPoint (p.lon, p.lat)
@@ -97,15 +99,18 @@ def trim (t:hj.GPSElement)->[hj.GPSElement]:
         dl.append (abs (g0.Distance (g1)) * 6.370e6 * 3.145927 / 180.)
         dt.append ((pts[i+1].time - p.time).total_seconds())
         pass
-    
+
     if 8*3600 < max (dt) or 50e3 < max (dl):
         log.warning ('Trimming: ' + t.get_label())
         idx = min ([dt.index (max (dt)), dl.index (max (dl))]) + 1
 
-        if 20 < idx: 
-            result = trim (Element(t._name, pts[:idx], t._type, t._label)) + \
-                     trim (Element(t._name, pts[idx:], t._type, t._label))
+        if 20 < idx:
+            if idx < len (pts) - 20:
+                result = trim(Element(t._name,pts[:idx-1],t._type,t._label)) + \
+                         trim (Element(t._name, pts[idx:], t._type, t._label))
+            else: result = trim (Element(t._name,pts[:idx-1],t._type,t._label))
         else: result = trim (Element(t._name, pts[idx:], t._type, t._label))
+
         log.info ('Number of segments: ' + str (len (result)))
         log.info ('Length of segments: ' + str ([len (t.get_points())
                                                  for t in result]))
