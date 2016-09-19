@@ -46,7 +46,7 @@ class Interface(hj.device.Interface):
     
     def fetch (self, dfn:str, move:bool)->io.TextIOBase:
         with open (dfn, 'rt') as f: buffer = f.read()
-        if move: os.unlink (fn)
+        if move: os.unlink (dfn)
         return io.StringIO(buffer)
     
     def routes(self):
