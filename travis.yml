@@ -1,2 +1,2 @@
 language: python
-script: python3 -m pytest test -v
+script: python3 -m pytest tests -v
