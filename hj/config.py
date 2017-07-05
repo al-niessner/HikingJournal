@@ -22,7 +22,9 @@ def initialize():
 
     hj.config.dt = hj.device.Type.local_file.name
     hj.config.formatters = {'html':'hj.util.format.html',
+                            'json':'hj.util.format.json',
                             'markdown':'hj.util.format.markdown'}
+    hj.config.export = ['html', 'markdown']
     hj.config.garmin_etrex_10__mp = '${HOME}'
     hj.config.local_file__dir = '${HOME}'
     hj.config.templates = {'hdr':os.path.join (os.path.dirname (__file__),

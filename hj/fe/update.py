@@ -22,6 +22,7 @@ def journal():
     with open (hj.config.templates['hdr'], 'rt') as f: th = f.read()
     with open (hj.config.templates['nav'], 'rt') as f: nv = f.read()
     with open (hj.config.templates['seg'], 'rt') as f: ts = f.read()
-    hj.tool.export._navigate (items, ['html'], idir, bdir, nv)
-    for item in items: hj.tool.export._entry(item, ['html'], idir, bdir, th, ts)
+    hj.tool.export._navigate (items, hj.config.export, idir, bdir, nv)
+    for item in items:\
+        hj.tool.export._entry(item, hj.config.export, idir, bdir, th, ts)
     return b''

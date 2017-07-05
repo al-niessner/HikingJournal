@@ -32,7 +32,7 @@ def _replace (t:str, this={}, segment={}, item=None)->str:
     while -1 < index:
         l = t.find ('}', index+2)
 
-        if index < l:
+        if index+2 < l:
             val = eval (t[index+2:l])
             t = t.replace (t[index:l+1], val)
         else: index += 2

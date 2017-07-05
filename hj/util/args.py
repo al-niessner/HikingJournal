@@ -65,7 +65,7 @@ def device_input (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
 def entry (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
     '''add the specific entry conversion arguments'''
     ap.add_argument ('-f', '--format', nargs='+', required=True,
-                     choices=['html','markdown'],
+                     choices=['html',',json','markdown'],
                      help='one or more of the possible export formats')
     ap.add_argument ('-n', '--name', nargs='+', required=True, type=str,
                      help='one of more entry names')
@@ -87,7 +87,7 @@ def entry (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
 def journal (ap:argparse.ArgumentParser, call) -> argparse.ArgumentParser:
     '''add the specific entry conversion arguments'''
     ap.add_argument ('-f', '--format', nargs='+', required=True,
-                     choices=['html','markdown'],
+                     choices=['html','json','markdown'],
                      help='one or more of the possible export formats')
     ap.add_argument ('-O', '--output-dir', required=True,
                      help='deposit all of the transforms into this directory')
