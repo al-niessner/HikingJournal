@@ -200,6 +200,7 @@ class Entry(Version):
         annots = hj.db.fetch (self.__aids)
         for aid in self.__aids:
             m = annots[aid].get_maps()
+            m.overlay (annots[aid].get_track().get_points())
             fn = os.path.join (odir, m.get_fingerprint()) + '.png'
             matplotlib.image.imsave (fn, m.get_image())
             for p in annots[aid].get_photos():
